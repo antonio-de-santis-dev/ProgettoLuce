@@ -107,7 +107,12 @@ export default function RisultatoView({ confronto }: { confronto: Confronto }) {
                   tickLine={false}
                 />
                 <Tooltip formatter={(value) => euro(String(value ?? 0))} />
-                <Bar dataKey="costo" radius={[0, 6, 6, 0]} barSize={32}>
+                <Bar
+                  dataKey="costo"
+                  radius={[0, 6, 6, 0]}
+                  barSize={32}
+                  isAnimationActive={false}
+                >
                   {chart.map((_, i) => (
                     <Cell key={i} fill={i === 0 ? "#a8b7ae" : "#194d3d"} />
                   ))}

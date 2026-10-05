@@ -63,11 +63,27 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   await expect(
     page.getByRole("region", { name: "Risultato del confronto" }),
   ).toContainText("123,00");
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: "test-results/confronto-desktop.png",
     fullPage: true,
+    animations: "disabled",
   });
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() =>
+      page.locator(".chart").evaluate((container) => {
+        const svg = container.querySelector("svg.recharts-surface");
+        return (
+          !!svg &&
+          Math.abs(
+            svg.getBoundingClientRect().width -
+              container.getBoundingClientRect().width,
+          ) < 2
+        );
+      }),
+    )
+    .toBeTruthy();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth,
@@ -76,6 +92,7 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   await page.screenshot({
     path: "test-results/confronto-mobile.png",
     fullPage: true,
+    animations: "disabled",
   });
   await page.getByRole("button", { name: "Apri menu" }).click();
   await page.getByRole("link", { name: "Storico", exact: true }).click();
