@@ -57,7 +57,7 @@ Prerequisito: Docker con Compose v2.
 ```bash
 cp .env.example .env
 # Modifica DB_PASSWORD nel file .env
-docker compose up --build -d
+docker compose up --build -d --wait
 ```
 
 Apri **http://localhost:8088**. Frontend e API condividono l'origine grazie a Nginx. PostgreSQL usa un volume persistente; backend e database non espongono porte sull'host.
@@ -120,6 +120,8 @@ npm run build
 ```
 
 La CI esegue anche la suite backend su PostgreSQL reale. I test locali usano H2 in modalità PostgreSQL, le migration Flyway e `ddl-auto=validate`. La configurazione usa il mock maker subclass, perché non sono richiesti mock di classi finali o metodi statici e non serve un agent JVM.
+
+Il job `compose` costruisce le immagini effettive, attende gli healthcheck e prova frontend, bundle, fallback SPA e API passando da Nginx. Crea il confronto sintetico da 77 € / 123 €, ricrea i container conservando il volume PostgreSQL e verifica che offerte, bollette e snapshot rimangano disponibili. I dati e il volume di questa prova sono isolati nel runner CI e rimossi al termine. Gli header di sicurezza vengono verificati su pagine, asset e API.
 
 ### Test nel browser
 

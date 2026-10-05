@@ -35,7 +35,7 @@ Creata migration **V1__schema_iniziale.sql**: offerte, voci, bollette, mesi, par
 
 ## Verifiche CI confermate
 
-La [CI del commit applicativo `26df397`](https://github.com/antonio-de-santis-dev/ProgettoLuce/actions/runs/37333331902) ha completato entrambi i job con esito **success** il 5 ottobre 2026.
+La [CI del commit `eb776cd`](https://github.com/antonio-de-santis-dev/ProgettoLuce/actions/runs/37338728264) ha completato tutti e tre i job (`backend`, `frontend`, `compose`) con esito **success** il 5 ottobre 2026.
 
 - **35 test backend su H2** e package Java, senza errori o test saltati.
 - **35 test backend su PostgreSQL 16.13 reale**, inclusi migration Flyway, schema e persistenza delle voci.
@@ -44,8 +44,15 @@ La [CI del commit applicativo `26df397`](https://github.com/antonio-de-santis-de
 - Layout mobile a 390 px senza overflow orizzontale, grafico adattato alla larghezza disponibile e nessun errore JavaScript nella pagina.
 - Screenshot desktop/mobile pubblicati nell'artefatto `browser-results` della CI e ispezionati.
 - `npm audit`: **0 vulnerabilità**.
+- **Immagini Docker backend/frontend costruite** tramite i Dockerfile del repository, inclusi i test durante la build.
+- **Stack Compose avviato**, con healthcheck riusciti su PostgreSQL, backend e frontend.
+- **Prova HTTP tramite Nginx**: bundle di produzione, fallback `/storico`, API, header di sicurezza e politiche di cache.
+- **Confronto reale nello stack**: totale di 77 € e risparmio di 123 € con dati sintetici.
+- **Persistenza verificata dopo `docker compose down` e nuova creazione dei container**, conservando il volume: offerta, bolletta e snapshot identico recuperati via API.
 
-L'ambiente locale non dispone di Docker e impedisce l'avvio di Chrome tramite socket Unix. La verifica browser è stata quindi eseguita con successo sul runner CI. Le immagini Docker e l'avvio completo con Compose non sono stati eseguiti: restano una modalità predisposta, non una verifica dichiarata superata.
+L'ambiente locale non dispone di Docker e impedisce l'avvio di Chrome tramite socket Unix. Le verifiche browser e Compose sono state quindi eseguite con successo sul runner CI. Lo stack di prova e il volume sono isolati per esecuzione e rimossi al termine.
+
+La verifica Compose ha anche confermato gli header CSP e `nosniff` su pagine, bundle e API. In Nginx sono stati rimossi gli `add_header` locali che impedivano l'ereditarietà degli header del server; la cache continua a usare rivalidazione per HTML e un anno per gli asset con hash. Aggiunto un healthcheck del frontend per attendere la disponibilità della pagina di produzione.
 
 La prima esecuzione Playwright ha individuato un selettore ambiguo fra conferma di salvataggio e stato di caricamento. Il selettore è stato corretto e la suite rieseguita con successo. Il grafico economico mostra subito le barre complete; gli screenshot vengono acquisiti dalla sommità della pagina e con le transizioni CSS disabilitate.
 
@@ -63,7 +70,7 @@ La prima esecuzione Playwright ha individuato un selettore ambiguo fra conferma 
 
 ## Stato
 
-**FASE 1 COMPLETATA** per il progetto nuovo: implementazione, verifiche locali, PostgreSQL e flusso browser confermati. I limiti funzionali e la verifica Compose ancora non eseguita rimangono esplicitamente documentati.
+**FASE 1 COMPLETATA** per il progetto nuovo: implementazione, verifiche locali, PostgreSQL, flusso browser e Docker Compose confermati. I limiti funzionali rimangono esplicitamente documentati; non è stato effettuato un deploy cloud.
 
 ## File modificati
 
@@ -152,3 +159,4 @@ Repository iniziale: rimosso il segnaposto `a.txt`. Nessun file applicativo pree
 - `frontend/tsconfig.json`
 - `frontend/vite.config.ts`
 - `scripts/carica-esempio.py`
+- `scripts/verifica-compose.py`
