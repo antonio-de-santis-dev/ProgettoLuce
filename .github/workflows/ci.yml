@@ -3,6 +3,36 @@ on: [push, pull_request]
 permissions:
   contents: read
 jobs:
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      COMPOSE_PROJECT_NAME: luce-ci-${{ github.run_id }}
+      DB_NAME: luce_compose_ci
+      DB_USER: luce
+      DB_PASSWORD: synthetic-compose-test-password
+      FRONTEND_PORT: '8088'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build immagini e avvio dello stack
+        run: |
+          docker compose config --quiet
+          docker compose up --build -d --wait --wait-timeout 180
+      - name: Confronto tramite Nginx e API reali
+        run: |
+          python3 scripts/carica-esempio.py http://127.0.0.1:8088/api
+          python3 scripts/verifica-compose.py crea "$RUNNER_TEMP/confronto-compose.json"
+      - name: Ricrea i container e verifica la persistenza del volume
+        run: |
+          docker compose down
+          docker compose up -d --wait --wait-timeout 180
+          python3 scripts/verifica-compose.py verifica "$RUNNER_TEMP/confronto-compose.json"
+      - name: Log dello stack
+        if: always()
+        run: docker compose ps -a && docker compose logs --no-color
+      - name: Rimuovi soltanto lo stack temporaneo della CI
+        if: always()
+        run: docker compose down --volumes --remove-orphans
   backend:
     runs-on: ubuntu-latest
     services:
