@@ -22,7 +22,9 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   ])
     await page.getByLabel(label).fill("0");
   await page.getByRole("button", { name: "Salva parametri" }).click();
-  await expect(page.getByRole("status")).toContainText("Parametri salvati");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Parametri salvati" }),
+  ).toBeVisible();
   await page.getByRole("link", { name: "Offerte", exact: true }).click();
   await page.getByRole("button", { name: "Nuova offerta" }).click();
   await page.getByLabel("Nome offerta").fill("Luce Fissa Browser");
@@ -30,7 +32,9 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   await page.getByLabel("Prezzo F0").fill("0.10");
   await page.getByLabel("PCV annuo (€)").fill("120");
   await page.getByRole("button", { name: "Salva", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Offerta salvata");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Offerta salvata" }),
+  ).toBeVisible();
   await page.getByRole("link", { name: "Bollette clienti" }).click();
   await page.getByRole("button", { name: "Nuova bolletta" }).click();
   await page.getByLabel("Cliente").fill("Cliente Browser");
@@ -42,7 +46,9 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   await page.getByLabel("F2 (kWh)").fill("200");
   await page.getByLabel("F3 (kWh)").fill("300");
   await page.getByRole("button", { name: "Salva", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Bolletta salvata");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Bolletta salvata" }),
+  ).toBeVisible();
   await page.getByRole("link", { name: "Confronto", exact: true }).click();
   await page
     .getByLabel("Bolletta del cliente")
