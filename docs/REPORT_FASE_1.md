@@ -33,15 +33,26 @@ Creata migration **V1__schema_iniziale.sql**: offerte, voci, bollette, mesi, par
 - Build TypeScript/Vite di produzione e package eseguibile backend.
 - Script shell controllato con `bash -n`; script esempio compilato con Python.
 
-## Verifiche ulteriori
+## Verifiche CI confermate
 
-Workflow CI predisposto per test su **PostgreSQL reale** e test **Playwright** di una consulenza completa su desktop/mobile, con screenshot.
+La [CI del commit applicativo `26df397`](https://github.com/antonio-de-santis-dev/ProgettoLuce/actions/runs/37333331902) ha completato entrambi i job con esito **success** il 5 ottobre 2026.
 
-L'ambiente locale non dispone di Docker e impedisce l'avvio di Chrome tramite socket Unix. Il tentativo Playwright locale si è fermato prima di eseguire azioni sulla pagina; non è un test superato. Le verifiche CI verranno riportate dopo averne letto l'esito.
+- **35 test backend su H2** e package Java, senza errori o test saltati.
+- **35 test backend su PostgreSQL 16.13 reale**, inclusi migration Flyway, schema e persistenza delle voci.
+- **9 test frontend** e build TypeScript/Vite di produzione.
+- **1 test Playwright completo**, con creazione dei parametri, offerta e bolletta tramite interfaccia, confronto di 77 € contro 200 €, risparmio di 123 € e riapertura dello storico.
+- Layout mobile a 390 px senza overflow orizzontale, grafico adattato alla larghezza disponibile e nessun errore JavaScript nella pagina.
+- Screenshot desktop/mobile pubblicati nell'artefatto `browser-results` della CI e ispezionati.
+- `npm audit`: **0 vulnerabilità**.
+
+L'ambiente locale non dispone di Docker e impedisce l'avvio di Chrome tramite socket Unix. La verifica browser è stata quindi eseguita con successo sul runner CI. Le immagini Docker e l'avvio completo con Compose non sono stati eseguiti: restano una modalità predisposta, non una verifica dichiarata superata.
+
+La prima esecuzione Playwright ha individuato un selettore ambiguo fra conferma di salvataggio e stato di caricamento. Il selettore è stato corretto e la suite rieseguita con successo. Il grafico economico mostra subito le barre complete; gli screenshot vengono acquisiti dalla sommità della pagina e con le transizioni CSS disabilitate.
 
 ## Warning e limiti
 
 - Warning npm sul proxy HTTP configurato nell'ambiente di esecuzione: esterno al repository.
+- Le GitHub Actions v4 emettono avvisi di deprecazione Node 20 e sono eseguite dal runner su Node 24; i job hanno completato tutti i controlli. Aggiornamento delle action da pianificare.
 - Nei log Hibernate la diagnostica del pool mostra alcuni valori `undefined/unknown`; startup, Flyway e validazione schema riescono.
 - Il mock maker subclass evita la dipendenza dall'attach agent JVM, non necessaria per questa suite.
 - I parametri sono espliciti, senza seed presentati come tariffe nazionali aggiornate.
@@ -52,7 +63,7 @@ L'ambiente locale non dispone di Docker e impedisce l'avvio di Chrome tramite so
 
 ## Stato
 
-Implementazione e verifiche locali completate. Verifiche PostgreSQL/browser CI in attesa: **FASE 1 NON COMPLETATA** finché questi controlli non saranno confermati.
+**FASE 1 COMPLETATA** per il progetto nuovo: implementazione, verifiche locali, PostgreSQL e flusso browser confermati. I limiti funzionali e la verifica Compose ancora non eseguita rimangono esplicitamente documentati.
 
 ## File modificati
 
