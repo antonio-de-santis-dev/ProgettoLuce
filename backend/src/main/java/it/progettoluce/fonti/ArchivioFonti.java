@@ -177,7 +177,7 @@ public class ArchivioFonti {
     jdbc.update(
         "INSERT INTO revisioni_fonti(dato_id,creato_il,motivo,contenuto) VALUES (?,?,?,?)",
         d.id,
-        Instant.now(),
+        java.sql.Timestamp.from(Instant.now()),
         motivo,
         codec.scrivi(dto(d)));
   }
@@ -186,7 +186,7 @@ public class ArchivioFonti {
   public void esito(String fonte, boolean successo, String messaggio) {
     jdbc.update(
         "INSERT INTO sincronizzazioni_fonti(creato_il,fonte,successo,messaggio) VALUES(?,?,?,?)",
-        Instant.now(),
+        java.sql.Timestamp.from(Instant.now()),
         fonte,
         successo,
         messaggio);
