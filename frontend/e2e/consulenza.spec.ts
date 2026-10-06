@@ -117,6 +117,7 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   });
   await page.screenshot({
     path: "test-results/editor-pdf-desktop.png",
+    fullPage: true,
     animations: "disabled",
   });
   expect(await page.locator(".pdf-preview-sheet").count()).toBe(1);
@@ -176,11 +177,14 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
       }),
     )
     .toBeTruthy();
-  expect(
-    await page.evaluate(
-      () => document.documentElement.scrollWidth <= window.innerWidth,
-    ),
-  ).toBeTruthy();
+  await page.getByRole("heading", { name: "Storico confronti" }).hover();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    )
+    .toBeTruthy();
   await page.screenshot({
     path: "test-results/confronto-mobile.png",
     fullPage: true,
