@@ -63,9 +63,14 @@ def main():
         if not any(b["id"] == snapshot["dati"]["bollettaId"] for b in api("/bollette")):
             raise AssertionError("Bolletta non conservata nel volume")
     result = snapshot["dati"]["risultato"]
+    with urlopen(BASE + f"/api/confronti/{snapshot['id']}/pdf", timeout=20) as response:
+        if response.headers.get_content_type() != "application/pdf" or not response.read().startswith(b"%PDF-"):
+            raise AssertionError("Download PDF non funzionante nello stack Docker")
+        if response.headers.get("Cache-Control") != "no-store":
+            raise AssertionError("Il PDF deve impedire la cache dei dati cliente")
     if Decimal(result["totale"]) != Decimal("77") or Decimal(result["risparmioPeriodo"]) != Decimal("123"):
         raise AssertionError("Risultato economico inatteso")
-    print(f"Compose {sys.argv[1]}: SPA, bundle, header, API e confronto #{snapshot['id']} verificati (77 / 123 euro).")
+    print(f"Compose {sys.argv[1]}: SPA, bundle, header, API, PDF e confronto #{snapshot['id']} verificati (77 / 123 euro).")
 
 
 if __name__ == "__main__":

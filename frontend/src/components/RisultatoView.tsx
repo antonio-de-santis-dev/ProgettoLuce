@@ -9,6 +9,7 @@ import {
 } from "recharts";
 import { ArrowDownRight, ArrowUpRight, CheckCircle2, Info } from "lucide-react";
 import Decimal from "decimal.js";
+import ScaricaPdf from "./ScaricaPdf";
 import { euro, numero, type Confronto } from "../domain";
 
 const nomi: Record<string, string> = {
@@ -42,9 +43,12 @@ export default function RisultatoView({ confronto }: { confronto: Confronto }) {
             {dati.bolletta.mesi[0].mese} → {dati.bolletta.mesi.at(-1)?.mese}
           </p>
         </div>
-        <span className="result-date">
-          {new Date(confronto.creatoIl).toLocaleDateString("it-IT")}
-        </span>
+        <div className="result-actions">
+          <span className="result-date">
+            {new Date(confronto.creatoIl).toLocaleDateString("it-IT")}
+          </span>
+          <ScaricaPdf key={confronto.id} id={confronto.id} />
+        </div>
       </div>
       <div className="metrics">
         <div className="metric">

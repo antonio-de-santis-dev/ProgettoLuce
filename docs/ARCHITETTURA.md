@@ -97,6 +97,14 @@ Formato errori controllati:
 
 Status: 400 per input/formato, 404 per risorsa assente, 409 per versione obsoleta o vincolo. I decimali delle risposte sono stringhe. Lo schema non accetta campi sconosciuti, evitando payload frontend silenziosamente ignorati.
 
+## Esportazione PDF dei confronti
+
+`GET /api/confronti/{id}/pdf` recupera lo snapshot tramite `ConfrontoService.leggi` e lo passa a `ConfrontoPdfRenderer`. La generazione usa Apache PDFBox 3.0.8 e font DejaVu incorporati, senza ricalcolo, lettura delle condizioni correnti o dipendenza da software installato nell'immagine runtime. Nessuna migration aggiuntiva.
+
+La risposta è un allegato `application/pdf`, con nome stabile `confronto-{id}.pdf` e `Cache-Control: no-store`. Una risorsa inesistente restituisce 404. Il documento viene costruito in memoria e non salvato sul server. Il pulsante condiviso `ScaricaPdf` è disponibile nel risultato e nello storico; gestisce risposta binaria, errore JSON, stato di caricamento e rilascio dell'URL temporaneo.
+
+Il report contiene cliente/POD, condizioni, riepilogo economico, tutte le righe a precisione originale, consumi/PUN, parametri e limiti. Totali visualizzati a centesimi, dati di dettaglio senza arrotondamenti aggiuntivi. Font non universale: i caratteri senza glifo vengono rappresentati da `?` e la sostituzione è segnalata nel documento; l'originale resta nello snapshot.
+
 ## Persistenza e rilascio
 
 Schema iniziale V1, vincoli e indici inclusi. Futuri cambiamenti richiederanno V2 e successive senza modificare V1 già applicata.

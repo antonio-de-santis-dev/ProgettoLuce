@@ -886,6 +886,23 @@ td {
   width: 100%;
   min-width: 0;
 }
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.pdf-download {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+}
+.pdf-download .error {
+  max-width: 300px;
+}
 .annual-card {
   padding: 28px;
   border: 1px solid #dfe5d2;
@@ -1171,6 +1188,10 @@ td {
   .result-banner {
     align-items: flex-start;
     gap: 10px;
+    flex-direction: column;
+  }
+  .result-actions {
+    justify-content: flex-start;
   }
   .result-date {
     font-size: 0.66rem;
