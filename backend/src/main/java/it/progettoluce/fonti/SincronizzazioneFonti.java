@@ -47,8 +47,10 @@ public class SincronizzazioneFonti {
 
   public Stato sincronizza(String periodoGme) {
     YearMonth mese =
-        periodoGme == null ? YearMonth.now().minusMonths(1) : YearMonth.parse(periodoGme);
-    if (!mese.isBefore(YearMonth.now()))
+        periodoGme == null
+            ? YearMonth.now(java.time.ZoneId.of("Europe/Rome")).minusMonths(1)
+            : YearMonth.parse(periodoGme);
+    if (!mese.isBefore(YearMonth.now(java.time.ZoneId.of("Europe/Rome"))))
       throw new IllegalArgumentException("GME richiede un mese concluso");
     if (!busy.compareAndSet(false, true)) return stato();
     try {
