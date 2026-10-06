@@ -702,6 +702,7 @@ legend small {
   margin: 12px auto 25px;
 }
 .table-scroll {
+  position: relative;
   overflow: auto;
 }
 table {

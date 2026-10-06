@@ -178,6 +178,21 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
     )
     .toBeTruthy();
   await page.getByRole("heading", { name: "Storico confronti" }).hover();
+  console.log(
+    "Mobile overflow",
+    await page.evaluate(() => ({
+      width: document.documentElement.scrollWidth,
+      viewport: window.innerWidth,
+      elements: [...document.querySelectorAll("body *")]
+        .filter((e) => e.getBoundingClientRect().right > window.innerWidth + 1)
+        .slice(0, 12)
+        .map((e) => ({
+          tag: e.tagName,
+          classes: e.className,
+          right: e.getBoundingClientRect().right,
+        })),
+    })),
+  );
   await expect
     .poll(() =>
       page.evaluate(
