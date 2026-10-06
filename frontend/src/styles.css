@@ -1251,6 +1251,7 @@ td {
 
 /* PDF editor: settings on the left, actual printable document on the right. */
 .modal.pdf-editor {
+  height: min(900px, calc(100dvh - 32px));
   width: min(1400px, calc(100vw - 32px));
   max-width: none;
   max-height: calc(100dvh - 32px);
@@ -1281,9 +1282,11 @@ td {
   min-height: 0;
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr);
-  height: min(70dvh, 850px);
+  overflow: hidden;
+  height: auto;
 }
 .pdf-editor-controls {
+  min-height: 0;
   padding: 24px;
   overflow-y: auto;
   border-right: 1px solid var(--border);
@@ -1485,6 +1488,8 @@ td {
   accent-color: var(--primary);
 }
 .pdf-preview {
+  min-height: 0;
+  overflow: hidden;
   min-width: 0;
   background: #e8ece8;
   padding: 16px 24px;
@@ -1555,6 +1560,7 @@ td {
     display: block;
   }
   .modal.pdf-editor {
+    height: auto;
     width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
     overflow-y: auto;
@@ -1573,6 +1579,7 @@ td {
     display: flex;
     flex-direction: column;
     height: auto;
+    overflow: visible;
   }
   .pdf-editor-controls {
     overflow: visible;
@@ -1632,4 +1639,10 @@ td {
     min-height: 0;
     flex: auto;
   }
+}
+
+.pdf-preview-toolbar,
+.pdf-preview > .help,
+.pdf-preview > a {
+  flex-shrink: 0;
 }
