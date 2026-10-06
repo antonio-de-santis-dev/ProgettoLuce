@@ -5,6 +5,13 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
 }) => {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (message) => {
+    if (
+      message.type() === "error" &&
+      /Content Security Policy|frame-ancestors|frame-src/.test(message.text())
+    )
+      errors.push(message.text());
+  });
   await page.goto("/parametri");
   await page.getByLabel("Nome del profilo").fill("Profilo test browser");
   await page

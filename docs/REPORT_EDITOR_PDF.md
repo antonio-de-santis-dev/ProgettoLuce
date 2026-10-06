@@ -34,7 +34,7 @@ Riquadro consulente con nome/studio, ruolo, email, telefono e indirizzo. Dati in
 - 17 test frontend superati: personalizzazione, download dal blob dell’anteprima, risposte obsolete, errori e nuovo tentativo, preferenze nel download standard e rifiuto dei loghi non validi.
 - Package Java e build TypeScript/Vite completati.
 - Quattro PDF con logo e dati consulente renderizzati; controllo del testo nei limiti delle pagine. Il report personalizzato di esempio si sviluppa su tre pagine.
-- Flusso Playwright esteso con selezione stile/colore, dati consulente, caricamento logo, anteprima, download personalizzato, screenshot desktop/mobile e download storico.
+- Playwright eseguito sulla build di produzione, con la stessa CSP di Nginx e controllo degli errori CSP. Flusso esteso con selezione stile/colore, dati consulente, caricamento logo, anteprima, download personalizzato, screenshot desktop/mobile e download storico.
 - Verifica Compose estesa al POST personalizzato tramite Nginx e al permesso CSP per i frame blob. Esito CI da aggiornare alla conclusione dei job.
 
 ## Limiti
