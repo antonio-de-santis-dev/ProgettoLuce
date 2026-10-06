@@ -244,6 +244,7 @@ export default function FontiPage() {
           <label className="field">
             <span>Mese</span>
             <input
+              aria-label="Mese"
               type="month"
               disabled={busy}
               value={periodo}
@@ -438,6 +439,7 @@ export default function FontiPage() {
               className="button primary"
               disabled={
                 busy ||
+                lista.loading ||
                 (!edit &&
                   (!codice || lista.data.some((d) => d.codice === codice)))
               }
