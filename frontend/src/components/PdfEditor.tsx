@@ -377,6 +377,16 @@ export default function PdfEditor({
                       : "Aggiornamento del PDF…"}
               </p>
             </div>
+            {preview && (
+              <a
+                className="text-button"
+                href={preview.url}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Apri PDF in una nuova scheda
+              </a>
+            )}
             {!ready && !error && hexValid && (
               <LoaderCircle className="spin" size={20} />
             )}
@@ -430,20 +440,6 @@ export default function PdfEditor({
               </button>
             </div>
           )}
-          {preview && (
-            <a
-              className="text-button"
-              href={preview.url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Apri l’anteprima in una nuova scheda
-            </a>
-          )}
-          <p className="help">
-            Un foglio intero alla volta. Usa le frecce per cambiare pagina. Il
-            documento è un esempio grafico e non viene salvato nello storico.
-          </p>
         </section>
       </div>
       {saveError && <Errore message={saveError} />}

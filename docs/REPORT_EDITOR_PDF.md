@@ -44,3 +44,7 @@ La correzione aggiunge una sezione autonoma, salvataggio nel database e visualiz
 ## Limiti
 
 La configurazione PDF è condivisa nel workspace e disponibile da qualsiasi browser collegato allo stesso backend. Non è ancora associata a un account individuale e non è salvata per singolo confronto. Il PDF viene sempre ricreato dai dati economici salvati e dalla configurazione salvata corrente. Dati del consulente e logo non sono un profilo autenticato né una firma digitale. L’anteprima usa immagini PNG a 108 DPI; il file PDF mantiene testo vettoriale e font incorporati. Il rendering viene eseguito sul server, senza archiviare le immagini.
+
+## Interfaccia ampliata
+
+La sezione PDF usa tutta la larghezza disponibile del workspace. Su desktop il titolo è compatto e l’editor occupa lo spazio dello schermo sotto la barra superiore: controlli più larghi (420–600 px), scelte e descrizioni più leggibili, colori disposti su due colonne, PDF più grande e pulsanti di salvataggio sempre visibili. Il collegamento al PDF è nella barra dell’anteprima per lasciare più spazio al foglio. Sotto 1100 px le sezioni si dispongono in verticale. Il controllo browser include anche 1920×1080: dimensioni effettive di scelte e foglio e posizione dei pulsanti entro lo schermo.

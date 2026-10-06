@@ -129,6 +129,19 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
       sheet.y >= previewArea.y &&
       sheet.y + sheet.height <= previewArea.y + previewArea.height + 1,
   ).toBeTruthy();
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  const controlsWide = await page.locator(".pdf-editor-controls").boundingBox();
+  const sheetWide = await page.locator(".pdf-preview-sheet").boundingBox();
+  const editorWide = await page.locator(".pdf-settings-editor").boundingBox();
+  expect(controlsWide?.width).toBeGreaterThan(500);
+  expect(sheetWide?.width).toBeGreaterThan(400);
+  expect(editorWide && editorWide.y + editorWide.height <= 1080).toBeTruthy();
+  await page.screenshot({
+    path: "test-results/editor-pdf-ampio.png",
+    animations: "disabled",
+  });
+  await page.setViewportSize({ width: 1280, height: 720 });
   await page.getByRole("button", { name: "Pagina successiva" }).click();
   await expect(
     page.getByAltText("Anteprima PDF · pagina 2 di 3"),

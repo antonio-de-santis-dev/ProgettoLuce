@@ -92,7 +92,13 @@ export default function App() {
           onClick={() => setOpen(false)}
         />
       )}
-      <div className="workspace">
+      <div
+        className={
+          location.pathname === "/impostazioni-pdf"
+            ? "workspace workspace-pdf"
+            : "workspace"
+        }
+      >
         <header className="topbar">
           <div className="breadcrumb">
             <button
