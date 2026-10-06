@@ -63,6 +63,12 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   await expect(
     page.getByRole("region", { name: "Risultato del confronto" }),
   ).toContainText("123,00");
+  const downloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Scarica PDF", exact: true }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toMatch(/^confronto-\d+\.pdf$/);
+  await download.saveAs("test-results/confronto-esempio.pdf");
+  expect(await download.failure()).toBeNull();
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
     path: "test-results/confronto-desktop.png",
@@ -103,5 +109,10 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   await expect(
     page.getByRole("region", { name: "Risultato del confronto" }),
   ).toContainText("77,00");
+  const storicoDownloadPromise = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Scarica PDF", exact: true }).click();
+  expect((await storicoDownloadPromise).suggestedFilename()).toBe(
+    download.suggestedFilename(),
+  );
   expect(errors).toEqual([]);
 });

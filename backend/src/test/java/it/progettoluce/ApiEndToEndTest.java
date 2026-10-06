@@ -272,6 +272,43 @@ class ApiEndToEndTest {
         .andExpect(status().isOk());
   }
 
+  @Test
+  void scaricaPdfDaSnapshotAncheDopoEliminazioneDelleSorgenti() throws Exception {
+    salvaParametri();
+    long oid =
+        postJson(
+                "/api/offerte",
+                request(TipoOfferta.PREZZO_FISSO, TipoTariffa.MONORARIA, "0.1", null))
+            .get("id")
+            .asLong();
+    long bid = postJson("/api/bollette", bolletta()).get("id").asLong();
+    long cid =
+        postJson("/api/confronti", java.util.Map.of("bollettaId", bid, "offertaId", oid))
+            .get("id")
+            .asLong();
+    mvc.perform(delete("/api/offerte/" + oid)).andExpect(status().isNoContent());
+    mvc.perform(delete("/api/bollette/" + bid)).andExpect(status().isNoContent());
+    jdbc.update("DELETE FROM parametri_gestore");
+    byte[] bytes =
+        mvc.perform(get("/api/confronti/" + cid + "/pdf"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/pdf"))
+            .andExpect(header().string("Cache-Control", "no-store"))
+            .andExpect(
+                header()
+                    .string(
+                        "Content-Disposition",
+                        "attachment; filename=\"confronto-" + cid + ".pdf\""))
+            .andReturn()
+            .getResponse()
+            .getContentAsByteArray();
+    try (var pdf = org.apache.pdfbox.Loader.loadPDF(bytes)) {
+      assertThat(new org.apache.pdfbox.text.PDFTextStripper().getText(pdf))
+          .contains("77,00 €", "123,00 €", "Cliente test");
+    }
+    mvc.perform(get("/api/confronti/999999/pdf")).andExpect(status().isNotFound());
+  }
+
   private ParametriRequest parametri() {
     return new ParametriRequest(
         "Test",

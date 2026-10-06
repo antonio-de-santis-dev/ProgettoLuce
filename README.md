@@ -11,6 +11,7 @@ Applicazione nuova per consulenti energetici: offerte, bollette clienti, paramet
 - Configurazione dei parametri di trasporto, oneri, dispacciamento, perdite e accisa.
 - Confronto sullo stesso consumo, grafico dei costi, righe di calcolo e stima annuale indicativa.
 - Storico con snapshot immutabili di bolletta, offerta, parametri e risultato.
+- Download PDF del confronto, disponibile nel risultato e nello storico.
 - Controllo della versione sugli aggiornamenti e validazione degli input.
 
 ## Avvio rapido, senza installare PostgreSQL
@@ -90,6 +91,14 @@ Il database deve esistere ed essere accessibile. Flyway crea le tabelle con `V1_
 4. **Confronto:** seleziona bolletta e offerta attiva. Il risultato viene salvato automaticamente.
 5. **Storico:** riapri un risultato anche se le condizioni commerciali sono cambiate.
 
+## Scaricare il risultato in PDF
+
+Dopo **Calcola confronto**, premi **Scarica PDF**. Lo stesso pulsante è disponibile nello **Storico**, dopo aver aperto un confronto.
+
+Il documento A4 contiene cliente/POD, offerta, periodo, importi e risparmio, proiezione annuale indicativa, dettaglio delle righe, consumi/PUN e parametri utilizzati. Include font incorporati, intestazione e numeri di pagina. Usa i dati salvati del confronto: modifica o cancellazione delle condizioni originali non cambiano il documento. Le cifre vengono formattate per la stampa, senza ripetere il calcolo.
+
+Endpoint: `GET /api/confronti/{id}/pdf`, risposta `application/pdf` e nome `confronto-{id}.pdf`. I font DejaVu e la loro licenza sono inclusi nel backend; non servono browser o programmi PDF installati sul server.
+
 ## Regole e limiti del modello iniziale
 
 Questo è un **simulatore parametrico**, non un motore certificato di fatturazione ARERA.
@@ -139,5 +148,6 @@ Playwright avvia backend e frontend di test su porte 8081 e 5174, con database i
 
 - [Architettura e contratto API](docs/ARCHITETTURA.md)
 - [Report della prima versione](docs/REPORT_FASE_1.md)
+- [PDF del risultato: implementazione e verifiche](docs/REPORT_PDF.md)
 
-PDF, upload/OCR, confronto multi-offerta, dashboard KPI, autenticazione e ruoli sono fasi successive; non sono presenti in questa prima versione.
+Upload/OCR, confronto multi-offerta, dashboard KPI, autenticazione e ruoli sono fasi successive. La generazione del PDF del risultato è disponibile; il caricamento e la lettura automatica di bollette PDF non sono ancora implementati.
