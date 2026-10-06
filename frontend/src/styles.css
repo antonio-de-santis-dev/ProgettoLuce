@@ -1257,12 +1257,18 @@ td {
   padding: 0;
   overflow: hidden;
 }
+.modal.pdf-editor[open] {
+  display: flex;
+  flex-direction: column;
+}
 .pdf-editor > header {
+  flex-shrink: 0;
   padding: 20px 24px;
   margin: 0;
   border-bottom: 1px solid var(--border);
 }
 .pdf-editor-intro {
+  flex-shrink: 0;
   display: flex;
   gap: 12px;
   padding: 12px 24px;
@@ -1271,6 +1277,8 @@ td {
   font-size: 14px;
 }
 .pdf-editor-grid {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 380px minmax(0, 1fr);
   height: min(70dvh, 850px);
@@ -1523,6 +1531,7 @@ td {
   margin: 0;
 }
 .pdf-editor-footer {
+  flex-shrink: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1542,6 +1551,9 @@ td {
   flex-wrap: wrap;
 }
 @media (max-width: 850px) {
+  .modal.pdf-editor[open] {
+    display: block;
+  }
   .modal.pdf-editor {
     width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);

@@ -80,16 +80,14 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   await page.getByRole("radio", { name: /Sintesi cliente/ }).check();
   await page.getByRole("button", { name: "Blu Istituzionale" }).click();
   await page.getByLabel("Nome o studio").fill("Studio Browser PDF");
-  await page
-    .getByLabel("Carica il tuo logo")
-    .setInputFiles({
-      name: "logo.png",
-      mimeType: "image/png",
-      buffer: Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAPAAAABQCAYAAAAnSfh8AAABCklEQVR4nO3TQQ3AIADAwDEhCEEippmHfUiTOwX9dMy1zwMkvbcDgP8MDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCPsAaBECgTfwPnMAAAAASUVORK5CYII=",
-        "base64",
-      ),
-    });
+  await page.getByLabel("Carica il tuo logo").setInputFiles({
+    name: "logo.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAPAAAABQCAYAAAAnSfh8AAABCklEQVR4nO3TQQ3AIADAwDEhCEEippmHfUiTOwX9dMy1zwMkvbcDgP8MDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCPsAaBECgTfwPnMAAAAASUVORK5CYII=",
+      "base64",
+    ),
+  });
   await expect(page.getByAltText("Logo scelto per il report")).toBeVisible();
   await expect(page.getByText("PDF aggiornato · formato A4")).toBeVisible();
   await expect(page.getByTitle("PDF personalizzato")).toHaveAttribute(
@@ -100,6 +98,10 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
     path: "test-results/editor-pdf-desktop.png",
     animations: "disabled",
   });
+  await page.setViewportSize({ width: 1280, height: 600 });
+  await expect(
+    page.getByRole("button", { name: "Scarica PDF personalizzato" }),
+  ).toBeInViewport();
   const customDownloadPromise = page.waitForEvent("download");
   await page
     .getByRole("button", { name: "Scarica PDF personalizzato" })
