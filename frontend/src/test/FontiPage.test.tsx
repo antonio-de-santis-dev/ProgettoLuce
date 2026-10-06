@@ -108,11 +108,11 @@ it("seleziona gli indici PUN e crea un valore manuale per il mese scelto", async
   await user.clear(screen.getByLabelText("Mese", { exact: true }));
   await user.type(screen.getByLabelText("Mese", { exact: true }), "2025-12");
   await user.selectOptions(
-    screen.getByRole("combobox", { name: "Profilo", exact: true }),
+    screen.getByRole("combobox", { name: "Profilo" }),
     "INDICE",
   );
   await user.selectOptions(
-    screen.getByRole("combobox", { name: "Parametro", exact: true }),
+    screen.getByRole("combobox", { name: "Parametro" }),
     "PUN_F0",
   );
   await user.type(screen.getByLabelText("Valore", { exact: true }), "0.12");
