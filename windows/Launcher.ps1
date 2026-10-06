@@ -55,7 +55,7 @@ try {
             exit 0
         }
         if (-not (Test-Ready $state)) {
-            throw 'Il servizio non risponde ancora. Attendere che termini l’avvio e riprovare; consultare i log in caso di errore.'
+            throw 'Il servizio non risponde ancora. Attendere che termini avvio e riprovare; consultare i log in caso di errore.'
         }
         Invoke-RestMethod "$baseUrl/portable/shutdown" -Method Post -Headers @{'X-Luce-Token'=$state.Token} -TimeoutSec 5 | Out-Null
         if (-not $process.WaitForExit(45000)) { throw 'Arresto non completato: controllare i log. Nessun altro processo e stato terminato.' }
@@ -70,7 +70,7 @@ try {
         exit 0
     }
     $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback,8088)
-    try { $listener.Start() } catch { throw 'La porta 8088 e occupata. Chiudere l’altra applicazione o un’altra copia di ProgettoLuce e riprovare.' }
+    try { $listener.Start() } catch { throw 'La porta 8088 e occupata. Chiudere altra applicazione o una seconda copia di ProgettoLuce e riprovare.' }
     finally { $listener.Stop() }
     foreach ($folder in @('data','logs')) {
         New-Item -ItemType Directory -Force -Path (Join-Path $root $folder) | Out-Null

@@ -36,13 +36,12 @@ Se mancano parametri ufficiali, utilizzare la modalita manuale con valori verifi
 PROBLEMI
 Porta 8088 occupata: chiudere l'altra copia/applicazione e riprovare.
 Doppio clic su Avvia quando e gia aperto: viene riaperto lo stesso programma.
-Consultare logspp.log e logs\error.log in caso di errore.
+Consultare logs/app.log e logs\error.log in caso di errore.
 Gli script sono locali e non firmati: eventuali criteri aziendali possono impedirne
 l'esecuzione. In tal caso rivolgersi al responsabile IT; non modificare i criteri.
 Il servizio ascolta soltanto sul PC locale, non e condiviso sulla rete.
 
 LICENZE
 Il runtime Java Temurin e incluso con le sue licenze nella cartella runtime\legal.
-La versione precisa e riportata in VERSIONE.txt e in runtime
-elease.
+La versione precisa e riportata in VERSIONE.txt e in runtime/release.
 Le dipendenze Java conservano le proprie licenze all'interno del JAR.
