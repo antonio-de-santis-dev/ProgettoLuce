@@ -25,3 +25,10 @@ management:
     health:
       probes:
         enabled: true
+
+fonti:
+  automatico: ${FONTI_AUTOMATICO:true}
+  intervallo-ms: ${FONTI_INTERVALLO_MS:86400000}
+  gme:
+    login: ${GME_LOGIN:}
+    password: ${GME_PASSWORD:}

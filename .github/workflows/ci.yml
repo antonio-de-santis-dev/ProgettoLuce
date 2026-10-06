@@ -12,6 +12,7 @@ jobs:
       DB_USER: luce
       DB_PASSWORD: synthetic-compose-test-password
       FRONTEND_PORT: '8088'
+      FONTI_AUTOMATICO: 'false'
     steps:
       - uses: actions/checkout@v4
       - name: Build immagini e avvio dello stack

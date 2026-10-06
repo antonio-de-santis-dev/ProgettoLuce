@@ -24,7 +24,7 @@ React → `OffertaRequest` validata → `OffertaService` → `OffertaVociFactory
 
 **Offerta / VoceCorrispettivo / ParametriGestore** contengono la configurazione per il costo proposto.
 
-Il PUN è un input esplicito per ciascun mese e fascia, non un feed automatico di mercato. Le due sorgenti non sono fuse e i prezzi dell'offerta non sovrascrivono i dati osservati del cliente.
+Nella modalità manuale il PUN è un input esplicito per ciascun mese e fascia. Sul ramo integrazioneAPI può essere risolto dall’archivio delle fonti ufficiali prima di invocare il motore. Le due sorgenti non sono fuse e i prezzi dell'offerta non sovrascrivono i dati osservati del cliente.
 
 ## Motore
 
@@ -116,3 +116,13 @@ Schema iniziale V1, vincoli e indici inclusi. Futuri cambiamenti richiederanno V
 Compose: PostgreSQL → backend → frontend, con healthcheck e volume dati. Nginx effettua proxy API e fallback SPA. I container applicativi hanno utente non root. Le credenziali stanno fuori dalle immagini e il file `.env` non è versionato.
 
 Questa fase è destinata alla validazione locale. I limiti del motore sono riportati nella UI e nel README. Non include autenticazione, certificazione tariffaria, paginazione degli archivi, automazione del PUN, fatture PDF, OCR o deploy cloud.
+
+## Fonti ufficiali e profili mensili (integrazioneAPI)
+
+`SincronizzazioneFonti` scarica fuori dalle transazioni HTTP del confronto, usa `PortaleOfferteClient` e il client opzionale `GmeClient`, quindi delega ad `ArchivioFonti` l’importazione atomica per fonte. L’archivio PostgreSQL/H2 conserva baseline ufficiale, override manuale, versione e revisioni. Un override non viene cancellato dalla reimportazione; un indice GME già acquisito prevale sul fallback CSV AU. Gli esiti di errore sono separati dai dati validi precedenti.
+
+Il motore resta privo di chiamate remote: `ParametriUfficiali` prepara una copia dei dati della bolletta e una mappa di profili per mese. Dati mancanti, mesi con IVA diversa e fiscalità domestica residente fino a 3 kW non verificata producono errore. `ConfrontoService` salva uno snapshot 1.1 con fonti e parametri mensili; i vecchi snapshot 1.0 sono leggibili tramite il campo opzionale. PDF e interfaccia leggono lo snapshot, non l’ultimo dato importato.
+
+Il profilo domestico normalizzato usa le unità del motore e i soli parametri coperti dalle regole di AU. I valori non domestici vengono conservati in sola lettura, senza una conversione incompleta delle quote potenza degli oneri. CdispD richiede una verifica delle condizioni dell’offerta, e l’aliquota effettiva manuale di accisa richiede verifica per ogni cliente.
+
+Le credenziali GME sono variabili d’ambiente del backend, non input del browser. La sincronizzazione pianificata è disattivata nei test e nella CI Docker/browser: fixture ufficiali e risposte di prova verificano formato, conversioni, completezza dei mesi e protocollo. [Guida operativa](INTEGRAZIONE_API.md).

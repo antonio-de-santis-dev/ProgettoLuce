@@ -49,6 +49,9 @@ class ApiEndToEndTest {
         json.writeValueAsString(opzioni));
     for (String tabella :
         List.of(
+            "revisioni_fonti",
+            "dati_ufficiali",
+            "sincronizzazioni_fonti",
             "confronti",
             "voci_corrispettivo",
             "offerte",
@@ -450,6 +453,98 @@ class ApiEndToEndTest {
                 .getResponse()
                 .getContentAsString())
         .isEqualTo(initial);
+  }
+
+  @Test
+  void confrontoMensileUfficialeSalvaFontiEPdfImmutabili() throws Exception {
+    salvaParametri();
+    long oid =
+        postJson(
+                "/api/offerte",
+                request(TipoOfferta.INDICIZZATA_PUN, TipoTariffa.MONORARIA, "0.1", null))
+            .path("id")
+            .asLong();
+    long bid = postJson("/api/bollette", bolletta()).path("id").asLong();
+    for (String codice : it.progettoluce.fonti.CatalogoFonti.UNITA.keySet()) {
+      String valore = codice.equals("aliquotaIva") ? "0.1" : codice.equals("PUN_F0") ? "0.1" : "0";
+      mvc.perform(
+              put("/api/fonti/dati")
+                  .contentType("application/json")
+                  .content(
+                      json.writeValueAsString(
+                          java.util.Map.of(
+                              "codice",
+                              codice,
+                              "periodo",
+                              "2026-01",
+                              "categoria",
+                              codice.startsWith("PUN_") ? "INDICE" : "DOMESTICO_RESIDENTE",
+                              "valore",
+                              valore,
+                              "motivo",
+                              "Fixture verificata"))))
+          .andExpect(status().isOk());
+    }
+    var payload =
+        java.util.Map.of(
+            "bollettaId",
+            bid,
+            "offertaId",
+            oid,
+            "usaFontiUfficiali",
+            true,
+            "categoria",
+            "DOMESTICO_RESIDENTE",
+            "confermaStandard",
+            true);
+    var confronto = postJson("/api/confronti", payload);
+    assertThat(confronto.path("dati").path("parametriMensili").get(0).path("fonti").size())
+        .isEqualTo(14);
+    assertThat(new BigDecimal(confronto.path("dati").path("risultato").path("totale").asText()))
+        .isEqualByComparingTo("83.6");
+    assertThat(
+            getJson("/api/bollette/" + bid)
+                .path("dati")
+                .path("mesi")
+                .get(0)
+                .path("pun")
+                .path("f0")
+                .asText())
+        .isEqualTo("0.09000000");
+    var indice = getJson("/api/fonti/dati?periodo=2026-01&categoria=INDICE").get(0);
+    mvc.perform(
+            put("/api/fonti/dati")
+                .contentType("application/json")
+                .content(
+                    json.writeValueAsString(
+                        java.util.Map.of(
+                            "codice",
+                            indice.path("codice").asText(),
+                            "periodo",
+                            "2026-01",
+                            "categoria",
+                            "INDICE",
+                            "valore",
+                            "0.2",
+                            "versione",
+                            indice.path("versione").asLong(),
+                            "motivo",
+                            "Nuova verifica"))))
+        .andExpect(status().isOk());
+    assertThat(getJson("/api/confronti/" + confronto.path("id").asLong()).path("dati"))
+        .isEqualTo(confronto.path("dati"));
+    var bytes =
+        mvc.perform(get("/api/confronti/" + confronto.path("id").asLong() + "/pdf"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsByteArray();
+    try (var pdf = org.apache.pdfbox.Loader.loadPDF(bytes)) {
+      assertThat(new org.apache.pdfbox.text.PDFTextStripper().getText(pdf))
+          .contains("Fonti e parametri mensili salvati", "correzione manuale", "83,60");
+    }
+    mvc.perform(get("/api/fonti/dati?periodo=nonvalido&categoria=INDICE"))
+        .andExpect(status().isBadRequest());
   }
 
   private ParametriRequest parametri() {

@@ -1,3 +1,4 @@
+import { nomi as nomiFonti } from "../fonti";
 import {
   BarChart,
   Bar,
@@ -176,6 +177,46 @@ export default function RisultatoView({ confronto }: { confronto: Confronto }) {
           arrotonda l’imponibile una sola volta.
         </p>
       </section>
+      {dati.parametriMensili && (
+        <details className="panel calculation">
+          <summary>
+            Fonti e parametri mensili salvati · {dati.parametriMensili.length}{" "}
+            mesi
+          </summary>
+          {dati.parametriMensili.map((m) => (
+            <div key={m.mese}>
+              <h3>{m.mese}</h3>
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Parametro</th>
+                      <th>Valore usato</th>
+                      <th>Fonte</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {m.fonti.map((f) => (
+                      <tr key={f.id}>
+                        <td>{nomiFonti[f.codice] ?? f.codice}</td>
+                        <td>
+                          {numero(f.valore, 8)} {f.unita}
+                        </td>
+                        <td>
+                          {f.fonte}
+                          {f.valoreManuale !== null
+                            ? " · correzione manuale"
+                            : ""}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          ))}
+        </details>
+      )}
       <details className="panel calculation">
         <summary>Apri il dettaglio di calcolo · {r.righe.length} righe</summary>
         <div className="table-scroll">

@@ -157,3 +157,9 @@ Playwright avvia backend e frontend di test su porte 8081 e 5174, con database i
 - [Editor PDF: stili, personalizzazione e verifiche](docs/REPORT_EDITOR_PDF.md)
 
 Upload/OCR, confronto multi-offerta, dashboard KPI, autenticazione e ruoli sono fasi successive. La generazione del PDF del risultato è disponibile; il caricamento e la lettura automatica di bollette PDF non sono ancora implementati.
+
+## Fonti ufficiali (ramo integrazioneAPI)
+
+La sezione **Fonti ufficiali** importa i CSV del Portale Offerte, aggiorna i parametri domestici per mese e conserva le correzioni manuali. Un client API GME opzionale importa gli indici PUN per fascia con credenziali personali nel backend. Il confronto può usare questi dati mensili e ne salva la provenienza nello storico e nel PDF.
+
+Consulta [la guida di integrazione, attivazione GME e parametri da completare](docs/INTEGRAZIONE_API.md). `FONTI_AUTOMATICO=false` disattiva il recupero programmato. Non tutti i contratti/fiscalità sono coperti dal profilo standard: la guida descrive i controlli richiesti.

@@ -41,6 +41,14 @@ public class ApiExceptionHandler {
     return risposta(400, "Formato dei dati non valido");
   }
 
+  @ExceptionHandler({
+    jakarta.validation.ConstraintViolationException.class,
+    org.springframework.web.method.annotation.HandlerMethodValidationException.class
+  })
+  ResponseEntity<Errore> parametriInvalidi(Exception e) {
+    return risposta(400, "Parametri della richiesta non validi");
+  }
+
   @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
   ResponseEntity<Errore> conflitto(Exception e) {
     return risposta(409, "Dati modificati da un'altra sessione. Ricarica prima di salvare.");

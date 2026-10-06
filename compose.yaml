@@ -19,6 +19,9 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-progettoluce}
       DB_USER: ${DB_USER:-luce}
       DB_PASSWORD: ${DB_PASSWORD}
+      FONTI_AUTOMATICO: ${FONTI_AUTOMATICO:-true}
+      GME_LOGIN: ${GME_LOGIN:-}
+      GME_PASSWORD: ${GME_PASSWORD:-}
       JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=65
     depends_on:
       postgres:
