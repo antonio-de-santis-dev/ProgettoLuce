@@ -14,7 +14,9 @@ test("fonti ufficiali: inserimento manuale, storico e vista mobile", async ({
     .getByLabel("Motivo della correzione / fonte verificata")
     .fill("Fixture sintetica browser");
   await page.getByRole("button", { name: "Salva valore manuale" }).click();
-  await expect(page.getByRole("status")).toContainText("Correzione salvata");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Correzione salvata" }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Modifica", exact: true }).click();
   await expect(page.getByLabel("Valore (€/kWh)")).toHaveValue("0.12000000");
   await page.getByRole("button", { name: "Annulla modifica" }).click();
