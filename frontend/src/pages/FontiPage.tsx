@@ -261,6 +261,7 @@ export default function FontiPage() {
           <label className="field">
             <span>Profilo</span>
             <select
+              aria-label="Profilo"
               value={categoria}
               onChange={(e) => {
                 setCategoria(e.target.value);
@@ -400,6 +401,7 @@ export default function FontiPage() {
               <label className="field">
                 <span>Parametro</span>
                 <select
+                  aria-label="Parametro"
                   value={codice}
                   onChange={(e) => setCodice(e.target.value)}
                 >

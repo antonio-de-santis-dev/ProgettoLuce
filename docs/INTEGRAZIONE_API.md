@@ -128,6 +128,6 @@ Solo HTTPS e host ufficiali sono ammessi nel client. Timeout, limiti di dimensio
 
 I test coprono CSV ufficiali di esempio, conversioni di unità, mancato riempimento artificiale delle fasce, protocollo GME ZIP, mesi con ora legale/solare, festività, duplicati, mesi incompleti, override/versioni/ripristino, errori delle fonti, tariffe diverse per mese, immutabilità dello snapshot/PDF e della bolletta originale. Le fixture sono dati ufficiali scaricati il 6 ottobre 2026; la CI non dipende dalla disponibilità in rete dei fornitori.
 
-Verifica locale: **57 test backend**, **21 test frontend** e build di produzione passati. Una prova con l’app avviata e la fonte pubblica reale ha importato **196 valori** senza credenziali: 100 valori originali, 18 normalizzati domestici e 78 indici mensili F0 (gennaio 2020 – giugno 2026). Verificati il profilo ottobre 2026 e il PUN gennaio 2026 `0.132665 €/kWh`. La prova GME autenticata resta da eseguire dopo la registrazione.
+Verifica locale: **57 test backend**, **22 test frontend** e build di produzione passati. Una prova con l’app avviata e la fonte pubblica reale ha importato **196 valori** senza credenziali: 100 valori originali, 18 normalizzati domestici e 78 indici mensili F0 (gennaio 2020 – giugno 2026). Verificati il profilo ottobre 2026 e il PUN gennaio 2026 `0.132665 €/kWh`. La prova GME autenticata resta da eseguire dopo la registrazione.
 
 [Verifica del main consolidato su GitHub Actions](https://github.com/antonio-de-santis-dev/ProgettoLuce/actions/runs/37467740758).

@@ -97,3 +97,42 @@ it("il ripristino richiede una motivazione e invia la versione corrente", async 
     }),
   );
 });
+
+it("seleziona gli indici PUN e crea un valore manuale per il mese scelto", async () => {
+  const user = userEvent.setup();
+  vi.spyOn(api, "get").mockImplementation(async (path) => ({
+    data: path === "/fonti" ? stato : [],
+  }));
+  const put = vi.spyOn(api, "put").mockResolvedValue({ data: {} });
+  render(<FontiPage />);
+  await user.clear(screen.getByLabelText("Mese", { exact: true }));
+  await user.type(screen.getByLabelText("Mese", { exact: true }), "2025-12");
+  await user.selectOptions(
+    screen.getByRole("combobox", { name: "Profilo", exact: true }),
+    "INDICE",
+  );
+  await user.selectOptions(
+    screen.getByRole("combobox", { name: "Parametro", exact: true }),
+    "PUN_F0",
+  );
+  await user.type(screen.getByLabelText("Valore", { exact: true }), "0.12");
+  await user.type(
+    screen.getByLabelText("Motivo della correzione / fonte verificata"),
+    "Dato verificato",
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Salva valore manuale" }),
+  );
+  await waitFor(() =>
+    expect(put).toHaveBeenCalledWith(
+      "/fonti/dati",
+      expect.objectContaining({
+        codice: "PUN_F0",
+        periodo: "2025-12",
+        categoria: "INDICE",
+        valore: "0.12",
+        versione: null,
+      }),
+    ),
+  );
+});
