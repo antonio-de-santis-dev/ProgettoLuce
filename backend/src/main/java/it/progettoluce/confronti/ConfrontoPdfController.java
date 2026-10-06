@@ -16,6 +16,13 @@ public class ConfrontoPdfController {
     this.renderer = renderer;
   }
 
+  @PostMapping(value = "/{id}/pdf/anteprima", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<PdfAnteprima> anteprima(
+      @PathVariable Long id, @Valid @RequestBody PdfPersonalizzazione opzioni) throws IOException {
+    byte[] bytes = renderer.genera(confronti.leggi(id), opzioni);
+    return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(PdfAnteprima.da(bytes));
+  }
+
   @PostMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
   public ResponseEntity<byte[]> personalizza(
       @PathVariable Long id, @Valid @RequestBody PdfPersonalizzazione opzioni) throws IOException {

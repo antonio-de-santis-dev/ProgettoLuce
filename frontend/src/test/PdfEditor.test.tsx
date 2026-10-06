@@ -33,10 +33,14 @@ beforeEach(() => {
   });
 });
 const pdf = () => new Blob(["%PDF-1.7"], { type: "application/pdf" });
+const anteprima = () => ({
+  pdfBase64: "JVBERi0xLjc=",
+  pagine: ["data:image/png;base64,AA=="],
+});
 describe("Editor PDF", () => {
   it("aggiorna le opzioni e scarica esattamente il PDF visualizzato", async () => {
-    const blob = pdf();
-    const post = vi.spyOn(api, "post").mockResolvedValue({ data: blob });
+    const data = anteprima();
+    const post = vi.spyOn(api, "post").mockResolvedValue({ data });
     const click = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
       .mockImplementation(function (this: HTMLAnchorElement) {
@@ -55,13 +59,13 @@ describe("Editor PDF", () => {
     await userEvent.type(name, "Studio Test");
     await waitFor(() =>
       expect(post).toHaveBeenLastCalledWith(
-        "/confronti/42/pdf",
+        "/confronti/42/pdf/anteprima",
         expect.objectContaining({
           stile: "SINTESI",
           colore: "#1E3A8A",
           consulente: expect.objectContaining({ nome: "Studio Test" }),
         }),
-        expect.objectContaining({ responseType: "blob" }),
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
       ),
     );
     await screen.findByText("PDF aggiornato · formato A4");
@@ -71,19 +75,22 @@ describe("Editor PDF", () => {
     );
     expect(click).toHaveBeenCalledOnce();
     expect(post).toHaveBeenCalledTimes(count);
-    expect(URL.createObjectURL).toHaveBeenCalledWith(blob);
+    expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+    expect(screen.getByAltText("Anteprima PDF · pagina 1 di 1")).toBeVisible();
     view.unmount();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:preview");
   });
   it("ignora risposte obsolete durante un aggiornamento", async () => {
-    let resolveFirst!: (data: { data: Blob }) => void;
-    const first = new Promise<{ data: Blob }>((resolve) => {
-      resolveFirst = resolve;
-    });
+    let resolveFirst!: (data: { data: ReturnType<typeof anteprima> }) => void;
+    const first = new Promise<{ data: ReturnType<typeof anteprima> }>(
+      (resolve) => {
+        resolveFirst = resolve;
+      },
+    );
     const post = vi
       .spyOn(api, "post")
       .mockReturnValueOnce(first)
-      .mockResolvedValue({ data: pdf() });
+      .mockResolvedValue({ data: anteprima() });
     render(<PdfEditor id={2} onClose={vi.fn()} />);
     await waitFor(() => expect(post).toHaveBeenCalledOnce());
     await userEvent.click(screen.getByRole("radio", { name: /Essenziale/ }));
@@ -92,7 +99,7 @@ describe("Editor PDF", () => {
     ).toHaveAttribute("aria-disabled", "true");
     await screen.findByText("PDF aggiornato · formato A4");
     const count = vi.mocked(URL.createObjectURL).mock.calls.length;
-    resolveFirst({ data: pdf() });
+    resolveFirst({ data: anteprima() });
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(URL.createObjectURL).toHaveBeenCalledTimes(count);
     expect(post.mock.calls[0]?.[2]?.signal?.aborted).toBe(true);
@@ -102,7 +109,7 @@ describe("Editor PDF", () => {
       .mockRejectedValueOnce(
         new Error("Servizio temporaneamente indisponibile"),
       )
-      .mockResolvedValue({ data: pdf() });
+      .mockResolvedValue({ data: anteprima() });
     render(<PdfEditor id={3} onClose={vi.fn()} />);
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Servizio temporaneamente indisponibile",

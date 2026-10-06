@@ -1505,7 +1505,7 @@ td {
   min-height: 0;
   flex: 1;
   border-radius: 6px;
-  overflow: hidden;
+  overflow: auto;
   box-shadow: 0 8px 24px #20332b15;
   background: white;
 }
@@ -1599,5 +1599,37 @@ td {
   }
   .pdf-editor-footer .button {
     justify-content: center;
+  }
+}
+
+.pdf-preview-pages {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #dce2dd;
+}
+.pdf-preview-pages figure {
+  margin: 0;
+}
+.pdf-preview-pages img {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: white;
+  box-shadow: 0 2px 8px #20332b18;
+}
+.pdf-preview-pages figcaption {
+  padding: 8px;
+  color: #63736b;
+  font-size: 12px;
+  text-align: center;
+}
+@media (max-width: 850px) {
+  .pdf-preview-document {
+    height: 480px;
+    max-height: 480px;
+    min-height: 0;
+    flex: auto;
   }
 }

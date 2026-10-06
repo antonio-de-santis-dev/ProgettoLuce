@@ -150,3 +150,20 @@ export async function leggiLogo(file: File): Promise<string> {
   });
   return data;
 }
+
+export type PdfAnteprima = { pdfBase64: string; pagine: string[] };
+export function decodificaAnteprima(data: PdfAnteprima): Blob {
+  if (
+    !data ||
+    !Array.isArray(data.pagine) ||
+    !data.pagine.length ||
+    !data.pagine.every((p) => p.startsWith("data:image/png;base64,"))
+  )
+    throw new Error("Anteprima PDF non valida.");
+  const binary = atob(data.pdfBase64);
+  if (!binary.startsWith("%PDF-"))
+    throw new Error("Il server non ha restituito un PDF valido.");
+  return new Blob([Uint8Array.from(binary, (c) => c.charCodeAt(0))], {
+    type: "application/pdf",
+  });
+}

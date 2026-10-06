@@ -107,7 +107,7 @@ Il report contiene cliente/POD, condizioni, riepilogo economico, tutte le righe 
 
 L’editor `PdfEditor` usa `POST /api/confronti/{id}/pdf` con `PdfPersonalizzazione`: stile, colore HEX, logo PNG/JPEG in data URI e dati del consulente. La validazione include lunghezze dei testi, dimensioni del file e dell’immagine; le dimensioni sono controllate prima della decodifica raster. Il colore secondario è derivato dal principale, con contrasto adattivo del testo. Non si accettano URL o SVG per il logo.
 
-L’anteprima è il PDF effettivo in un iframe blob. Le richieste sono ritardate di 400 ms e annullate quando arrivano nuove impostazioni; le risposte obsolete vengono ignorate. Il download usa il blob aggiornato già visualizzato. Preferenze e logo risiedono in localStorage, senza nuovi dati sul server. Nginx permette i frame blob e un corpo API fino a 2 MB; l’app rimane protetta dall’incorporamento esterno.
+L’endpoint `POST /api/confronti/{id}/pdf/anteprima` genera il PDF una sola volta e ne renderizza tutte le pagine in PNG a 108 DPI tramite PDFBox. Restituisce pagine e PDF in base64: il frontend mostra le pagine e decodifica gli stessi byte per il download, senza dipendere dal visualizzatore PDF del browser. Le richieste sono ritardate di 400 ms e annullate quando arrivano nuove impostazioni; le risposte obsolete vengono ignorate. Il download usa il blob aggiornato già visualizzato. Preferenze e logo risiedono in localStorage, senza nuovi dati sul server. Nginx permette un corpo API fino a 2 MB; l’app rimane protetta dall’incorporamento esterno.
 
 ## Persistenza e rilascio
 

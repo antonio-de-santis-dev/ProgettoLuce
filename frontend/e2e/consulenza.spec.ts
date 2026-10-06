@@ -97,10 +97,21 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
   });
   await expect(page.getByAltText("Logo scelto per il report")).toBeVisible();
   await expect(page.getByText("PDF aggiornato · formato A4")).toBeVisible();
-  await expect(page.getByTitle("PDF personalizzato")).toHaveAttribute(
-    "src",
-    /^blob:/,
-  );
+  await expect(
+    page.getByAltText("Anteprima PDF · pagina 1 di 3"),
+  ).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .getByAltText("Anteprima PDF · pagina 1 di 3")
+        .evaluate(
+          (image: HTMLImageElement) => image.complete && image.naturalWidth > 0,
+        ),
+    )
+    .toBeTruthy();
+  await page.locator(".pdf-editor-controls").evaluate((e) => {
+    e.scrollTop = 0;
+  });
   await page.screenshot({
     path: "test-results/editor-pdf-desktop.png",
     animations: "disabled",

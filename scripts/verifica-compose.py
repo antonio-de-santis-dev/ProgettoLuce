@@ -34,8 +34,6 @@ def check_frontend():
             raise AssertionError(f"Header nosniff assente: {path}")
         if "frame-ancestors 'none'" not in headers.get("Content-Security-Policy", ""):
             raise AssertionError(f"CSP assente: {path}")
-        if "frame-src 'self' blob:" not in headers.get("Content-Security-Policy", ""):
-            raise AssertionError("CSP senza supporto per l'anteprima PDF locale")
         if path == "/storico" and content != html:
             raise AssertionError("Fallback SPA non funzionante")
         if path == "/" and "no-cache" not in headers.get("Cache-Control", ""):
@@ -75,6 +73,10 @@ def main():
     with urlopen(request, timeout=20) as response:
         if response.headers.get_content_type() != "application/pdf" or not response.read().startswith(b"%PDF-"):
             raise AssertionError("Download PDF personalizzato non funzionante tramite Nginx")
+    preview = api(f"/confronti/{snapshot['id']}/pdf/anteprima", custom)
+    import base64
+    if not base64.b64decode(preview["pdfBase64"]).startswith(b"%PDF-") or not preview["pagine"]:
+        raise AssertionError("Anteprima PDF non funzionante tramite Nginx")
     if Decimal(result["totale"]) != Decimal("77") or Decimal(result["risparmioPeriodo"]) != Decimal("123"):
         raise AssertionError("Risultato economico inatteso")
     print(f"Compose {sys.argv[1]}: SPA, bundle, header, API, PDF standard/personalizzato e confronto #{snapshot['id']} verificati (77 / 123 euro).")

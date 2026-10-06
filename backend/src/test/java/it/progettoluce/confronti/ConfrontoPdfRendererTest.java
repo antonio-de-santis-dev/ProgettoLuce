@@ -134,6 +134,23 @@ class ConfrontoPdfRendererTest {
   }
 
   @Test
+  void anteprimaRenderizzaOgniPaginaDelPdfScaricabile() throws Exception {
+    byte[] bytes = new ConfrontoPdfRenderer().genera(esempio("Cliente anteprima", 10, "", false));
+    var preview = PdfAnteprima.da(bytes);
+    assertThat(Base64.getDecoder().decode(preview.pdfBase64())).isEqualTo(bytes);
+    try (var pdf = Loader.loadPDF(bytes)) {
+      assertThat(preview.pagine()).hasSize(pdf.getNumberOfPages());
+    }
+    for (String page : preview.pagine()) {
+      assertThat(page).startsWith("data:image/png;base64,");
+      byte[] png = Base64.getDecoder().decode(page.substring(page.indexOf(',') + 1));
+      var image = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(png));
+      assertThat(image.getWidth()).isGreaterThan(800);
+      assertThat(image.getHeight()).isGreaterThan(1200);
+    }
+  }
+
+  @Test
   void rifiutaLoghiCorrottiFormatiNonAmmessiEDimensioniEccessive() throws Exception {
     for (String data :
         List.of(

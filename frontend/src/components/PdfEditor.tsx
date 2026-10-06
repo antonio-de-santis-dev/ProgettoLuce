@@ -17,7 +17,8 @@ import {
   leggiPdfOptions,
   salvaPdfOptions,
   stiliPdf,
-  verificaPdf,
+  decodificaAnteprima,
+  type PdfAnteprima,
   type PdfOptions,
 } from "./pdfPersonalizzazione";
 
@@ -36,6 +37,7 @@ export default function PdfEditor({
     blob: Blob;
     url: string;
     settings: string;
+    pagine: string[];
   } | null>(null);
   const [error, setError] = useState("");
   const [logoError, setLogoError] = useState("");
@@ -59,14 +61,19 @@ export default function PdfEditor({
     setNotice("");
     const timer = window.setTimeout(async () => {
       try {
-        const { data } = await api.post<Blob>(
-          `/confronti/${id}/pdf`,
+        const { data } = await api.post<PdfAnteprima>(
+          `/confronti/${id}/pdf/anteprima`,
           JSON.parse(settings),
-          { responseType: "blob", signal: controller.signal },
+          { signal: controller.signal },
         );
-        verificaPdf(data);
+        const blob = decodificaAnteprima(data);
         if (!controller.signal.aborted)
-          setPreview({ blob: data, url: URL.createObjectURL(data), settings });
+          setPreview({
+            blob,
+            url: URL.createObjectURL(blob),
+            settings,
+            pagine: data.pagine,
+          });
       } catch (e) {
         if (!controller.signal.aborted) {
           const message = await errorePdf(e);
@@ -349,7 +356,9 @@ export default function PdfEditor({
                       : "Aggiornamento del PDF…"}
               </p>
             </div>
-            {!ready && !error && <LoaderCircle className="spin" size={20} />}
+            {!ready && !error && hexValid && (
+              <LoaderCircle className="spin" size={20} />
+            )}
           </div>
           {error && (
             <Errore message={error} onRetry={() => setRetry((v) => v + 1)} />
@@ -359,10 +368,19 @@ export default function PdfEditor({
             aria-busy={!ready && !error}
           >
             {preview ? (
-              <iframe
-                title="PDF personalizzato"
-                src={`${preview.url}#toolbar=0&navpanes=0&view=FitH`}
-              />
+              <div className="pdf-preview-pages">
+                {preview.pagine.map((page, index) => (
+                  <figure key={index}>
+                    <img
+                      src={page}
+                      alt={`Anteprima PDF · pagina ${index + 1} di ${preview.pagine.length}`}
+                    />
+                    <figcaption>
+                      Pagina {index + 1} di {preview.pagine.length}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
             ) : (
               <div className="pdf-preview-empty">
                 <FileText size={40} />
@@ -381,8 +399,8 @@ export default function PdfEditor({
             </a>
           )}
           <p className="help">
-            Scorri l’anteprima per leggere tutte le pagine. Se il browser non
-            mostra il PDF incorporato, aprilo nella nuova scheda.
+            Scorri l’anteprima per leggere tutte le pagine. La vista mostra le
+            pagine del PDF effettivo, anche su telefono.
           </p>
         </section>
       </div>

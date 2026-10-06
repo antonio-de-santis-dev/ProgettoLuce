@@ -323,6 +323,26 @@ class ApiEndToEndTest {
       assertThat(new org.apache.pdfbox.text.PDFTextStripper().getText(pdf))
           .contains("Studio Test", "77,00 €", "123,00 €");
     }
+    var preview =
+        mvc.perform(
+                post("/api/confronti/" + cid + "/pdf/anteprima")
+                    .contentType("application/json")
+                    .content("{\"stile\":\"SINTESI\"}"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/json"))
+            .andExpect(header().string("Cache-Control", "no-store"))
+            .andReturn()
+            .getResponse()
+            .getContentAsString();
+    var previewJson = json.readTree(preview);
+    assertThat(previewJson.get("pagine").size()).isGreaterThan(0);
+    try (var pdf =
+        org.apache.pdfbox.Loader.loadPDF(
+            java.util.Base64.getDecoder().decode(previewJson.get("pdfBase64").asText()))) {
+      assertThat(new org.apache.pdfbox.text.PDFTextStripper().getText(pdf))
+          .contains("77,00 €", "123,00 €");
+      assertThat(pdf.getNumberOfPages()).isEqualTo(previewJson.get("pagine").size());
+    }
     for (String invalid :
         java.util.List.of(
             "{\"colore\":\"rosso\"}",
