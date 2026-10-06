@@ -24,7 +24,13 @@ Il report usa lo snapshot salvato: nessun ricalcolo e nessuna dipendenza dalle o
 
 ## Verifiche CI
 
-La CI verifica PostgreSQL, download Playwright dal risultato e dallo storico, e PDF tramite Nginx nello stack Compose anche dopo la ricreazione dei container. Esito da aggiornare dopo la conclusione dei job.
+Il 6 ottobre 2026 tutti e tre i job della [CI della modifica PDF](https://github.com/antonio-de-santis-dev/ProgettoLuce/actions/runs/37440195695) sono terminati con successo:
+
+- Backend: suite con H2 e PostgreSQL reale.
+- Frontend: test, build e flusso Playwright con download dal risultato e dallo storico.
+- Docker Compose: build dello stack, download PDF tramite Nginx e verifica del confronto persistito dopo la ricreazione dei container.
+
+Il PDF scaricato dal browser è stato renderizzato e controllato visivamente su entrambe le pagine; verificata anche la disposizione del pulsante su mobile. La fase 2 PDF è completata sul branch `feat/pdf-confronto`.
 
 ## Limiti
 
