@@ -13,3 +13,6 @@ frontend/playwright-report/
 **/__pycache__/
 
 /backups/
+
+/dist-windows/
+/backend/src/main/resources/static/

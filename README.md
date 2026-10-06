@@ -163,3 +163,7 @@ Upload/OCR, confronto multi-offerta, dashboard KPI, autenticazione e ruoli sono 
 La sezione **Fonti ufficiali** importa i CSV del Portale Offerte, aggiorna i parametri domestici per mese e conserva le correzioni manuali. Un client API GME opzionale importa gli indici PUN per fascia con credenziali personali nel backend. Il confronto può usare questi dati mensili e ne salva la provenienza nello storico e nel PDF.
 
 Consulta [la guida di integrazione, attivazione GME e parametri da completare](docs/INTEGRAZIONE_API.md). `FONTI_AUTOMATICO=false` disattiva il recupero programmato. Non tutti i contratti/fiscalità sono coperti dal profilo standard: la guida descrive i controlli richiesti.
+
+## Prova su Windows senza Docker
+
+La distribuzione portabile include Java, interfaccia e database locale. Estrarre lo ZIP e aprire `Avvia ProgettoLuce.cmd`; chiudere con `Ferma ProgettoLuce.cmd`. Dati conservati nella cartella `data`. [Istruzioni e build](docs/WINDOWS_PORTABILE.md).

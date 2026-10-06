@@ -1,0 +1,47 @@
+PROGETTOLUCE - VERSIONE PORTABILE PER TEST - WINDOWS x64
+
+REQUISITI
+Windows 10/11 a 64 bit (processore Intel o AMD), browser aggiornato.
+Non servono Docker, Java, Node, PostgreSQL o permessi amministratore.
+Questa versione non e destinata a Windows ARM o Windows a 32 bit.
+
+PRIMO AVVIO
+1. Estrarre TUTTO lo ZIP in una cartella personale, ad esempio Documenti\ProgettoLuce.
+   Non eseguire i file dentro lo ZIP e non usare Program Files o cartelle protette.
+   Evitare cartelle sincronizzate OneDrive o dischi di rete mentre l'app e aperta.
+2. Fare doppio clic su "Avvia ProgettoLuce.cmd".
+3. Attendere l'avvio. Il browser si apre su http://127.0.0.1:8088.
+4. Inserire parametri gestore, offerte e bollette, oppure usare i dati di esempio
+   indicati nel file DATI-DI-TEST.txt. I dati di esempio NON sono tariffe reali.
+
+CHIUSURA
+Chiudere il browser NON arresta il programma.
+Fare doppio clic su "Ferma ProgettoLuce.cmd" e attendere la conferma.
+Arrestare prima di spostare la cartella, fare backup o aggiornare il pacchetto.
+
+DATI E BACKUP
+Il database H2 e salvato nella cartella data. Non cancellarla.
+A programma fermo, copiare tutta la cartella ProgettoLuce su un altro disco.
+Per aggiornare, fare prima il backup e sostituire soltanto app, runtime,
+Launcher.ps1 e i file di avvio/documentazione. Conservare data.
+Non importare il database PostgreSQL della versione Docker in questa cartella.
+Questa copia parte vuota e non contiene dati o credenziali dell'autore.
+
+INTERNET
+Confronti, storico ed esportazione PDF funzionano senza Internet.
+La sincronizzazione delle fonti ufficiali richiede una connessione.
+GME richiede credenziali personali e resta facoltativo: non e incluso alcun account.
+Se mancano parametri ufficiali, utilizzare la modalita manuale con valori verificati.
+
+PROBLEMI
+Porta 8088 occupata: chiudere l'altra copia/applicazione e riprovare.
+Doppio clic su Avvia quando e gia aperto: viene riaperto lo stesso programma.
+Consultare logs/app.log e logs\error.log in caso di errore.
+Gli script sono locali e non firmati: eventuali criteri aziendali possono impedirne
+l'esecuzione. In tal caso rivolgersi al responsabile IT; non modificare i criteri.
+Il servizio ascolta soltanto sul PC locale, non e condiviso sulla rete.
+
+LICENZE
+Il runtime Java Temurin e incluso con le sue licenze nella cartella runtime\legal.
+La versione precisa e riportata in VERSIONE.txt e in runtime/release.
+Le dipendenze Java conservano le proprie licenze all'interno del JAR.
