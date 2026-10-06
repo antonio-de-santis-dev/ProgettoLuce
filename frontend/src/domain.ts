@@ -93,6 +93,13 @@ export interface Confronto {
     offerta: Offerta;
     parametri: Parametri;
     risultato: Risultato;
+    parametriMensili?:
+      | {
+          mese: string;
+          parametri: Parametri;
+          fonti: import("./fonti").DatoFonte[];
+        }[]
+      | null;
   };
 }
 export const fasce = (tariffa: Tariffa): (keyof Prezzi)[] =>

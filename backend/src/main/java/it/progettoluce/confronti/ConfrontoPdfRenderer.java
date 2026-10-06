@@ -153,7 +153,10 @@ public class ConfrontoPdfRenderer {
           }
         }
         l.ensure(225);
-        l.section("Parametri utilizzati");
+        l.section(
+            confronto.dati().parametriMensili() == null
+                ? "Parametri utilizzati"
+                : "Parametri utilizzati · primo mese");
         l.field("Profilo / fonte", p.nomeProfilo() + " / " + p.fonte());
         l.row(
             "Perdite",
@@ -167,13 +170,32 @@ public class ConfrontoPdfRenderer {
         l.row("Oneri fissi", number(p.oneriFissiMese()) + " €/mese");
         l.row("Oneri variabili (netti)", number(p.oneriKwh()) + " €/kWh");
         l.row("Accisa uniforme (netta)", number(p.accisaKwh()) + " €/kWh");
+        if (confronto.dati().parametriMensili() != null) {
+          l.section("Fonti e parametri mensili salvati");
+          for (var mese : confronto.dati().parametriMensili()) {
+            l.paragraph(mese.mese() + " · " + mese.parametri().fonte(), true);
+            for (var dato : mese.fonti()) {
+              l.paragraph(
+                  dato.codice()
+                      + ": "
+                      + number(dato.valore())
+                      + " "
+                      + dato.unita()
+                      + " · "
+                      + dato.fonte()
+                      + (dato.valoreManuale() != null ? " · correzione manuale" : "")
+                      + (dato.pubblicatoIl() != null ? " · pubblicato " + dato.pubblicatoIl() : ""),
+                  false);
+            }
+          }
+        }
         if (o.note() != null && !o.note().isBlank()) l.field("Note offerta", o.note());
         l.section("Limiti della simulazione");
         l.paragraph(
             "Simulazione parametrica, non fattura o preventivo contrattuale. Nessuna certificazione"
                 + " ARERA. Esenzioni, scaglioni, periodi parziali e IVA mista non sono modellati."
-                + " PUN inserito manualmente. Le altre partite sono riportate su entrambi i lati:"
-                + " verificare che siano trasferibili.",
+                + " PUN e parametri sono quelli registrati nel confronto. Le altre partite sono"
+                + " riportate su entrambi i lati: verificare che siano trasferibili.",
             false);
         l.paragraph(
             "Il documento utilizza esclusivamente i dati del confronto salvato #"

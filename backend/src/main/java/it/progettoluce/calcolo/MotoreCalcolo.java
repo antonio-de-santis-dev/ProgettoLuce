@@ -18,6 +18,15 @@ public class MotoreCalcolo {
   private static final BigDecimal DODICI = new BigDecimal("12");
 
   public RisultatoCalcolo calcola(BollettaConcorrente b, Offerta o, ParametriRequest p) {
+    return calcola(
+        b,
+        o,
+        b.getMesi().stream()
+            .collect(java.util.stream.Collectors.toMap(MeseBolletta::getMese, m -> p)));
+  }
+
+  public RisultatoCalcolo calcola(
+      BollettaConcorrente b, Offerta o, Map<String, ParametriRequest> profili) {
     if (!o.isAttiva()) throw new IllegalArgumentException("L'offerta è disattivata");
     if (o.getVoci().isEmpty())
       throw new IllegalArgumentException("L'offerta non ha voci di calcolo");
@@ -26,6 +35,9 @@ public class MotoreCalcolo {
     for (String categoria : List.of("ENERGIA", "TRASPORTO", "ONERI", "IMPOSTE", "ALTRE_PARTITE"))
       categorie.put(categoria, BigDecimal.ZERO);
     for (MeseBolletta m : b.getMesi()) {
+      ParametriRequest p = profili.get(m.getMese());
+      if (p == null)
+        throw new IllegalArgumentException("Profilo mensile mancante per " + m.getMese());
       BigDecimal netti = m.totaleKwh();
       BigDecimal perdite =
           perdita(m.getF1(), p).add(perdita(m.getF2(), p)).add(perdita(m.getF3(), p));
