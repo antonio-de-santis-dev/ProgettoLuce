@@ -10,10 +10,15 @@ import org.springframework.web.bind.annotation.*;
 public class ConfrontoPdfController {
   private final ConfrontoService confronti;
   private final ConfrontoPdfRenderer renderer;
+  private final ImpostazioniPdfService impostazioni;
 
-  public ConfrontoPdfController(ConfrontoService confronti, ConfrontoPdfRenderer renderer) {
+  public ConfrontoPdfController(
+      ConfrontoService confronti,
+      ConfrontoPdfRenderer renderer,
+      ImpostazioniPdfService impostazioni) {
     this.confronti = confronti;
     this.renderer = renderer;
+    this.impostazioni = impostazioni;
   }
 
   @PostMapping(value = "/{id}/pdf/anteprima", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -31,7 +36,7 @@ public class ConfrontoPdfController {
 
   @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
   public ResponseEntity<byte[]> scarica(@PathVariable Long id) throws IOException {
-    byte[] pdf = renderer.genera(confronti.leggi(id));
+    byte[] pdf = renderer.genera(confronti.leggi(id), impostazioni.leggi().opzioni());
     return risposta(id, pdf);
   }
 

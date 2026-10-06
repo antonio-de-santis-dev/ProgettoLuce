@@ -2,16 +2,10 @@ import { useState } from "react";
 import { Download, LoaderCircle, SlidersHorizontal } from "lucide-react";
 import { api } from "../api";
 import { Errore } from "./ui";
-import PdfEditor from "./PdfEditor";
-import {
-  downloadPdf,
-  errorePdf,
-  leggiPdfOptions,
-  verificaPdf,
-} from "./pdfPersonalizzazione";
+import { Link } from "react-router-dom";
+import { downloadPdf, errorePdf, verificaPdf } from "./pdfPersonalizzazione";
 
 export default function ScaricaPdf({ id }: { id: number }) {
-  const [editor, setEditor] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -20,12 +14,9 @@ export default function ScaricaPdf({ id }: { id: number }) {
     setError("");
     setNotice("");
     try {
-      const options = leggiPdfOptions();
-      const { data } = options
-        ? await api.post<Blob>(`/confronti/${id}/pdf`, options, {
-            responseType: "blob",
-          })
-        : await api.get<Blob>(`/confronti/${id}/pdf`, { responseType: "blob" });
+      const { data } = await api.get<Blob>(`/confronti/${id}/pdf`, {
+        responseType: "blob",
+      });
       verificaPdf(data);
       downloadPdf(data, id);
       setNotice("Download PDF avviato.");
@@ -37,15 +28,10 @@ export default function ScaricaPdf({ id }: { id: number }) {
   }
   return (
     <div className="pdf-download">
-      <button
-        type="button"
-        className="button secondary"
-        onClick={() => setEditor(true)}
-      >
+      <Link className="button secondary" to="/impostazioni-pdf">
         <SlidersHorizontal size={18} />
-        Personalizza PDF
-      </button>
-      {editor && <PdfEditor id={id} onClose={() => setEditor(false)} />}
+        Impostazioni PDF
+      </Link>
       <button
         type="button"
         className="button secondary"

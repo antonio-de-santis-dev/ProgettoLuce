@@ -3,12 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../api";
 import PdfEditor from "../components/PdfEditor";
-import ScaricaPdf from "../components/ScaricaPdf";
-import {
-  defaultPdf,
-  leggiLogo,
-  salvaPdfOptions,
-} from "../components/pdfPersonalizzazione";
+import ImpostazioniPdfPage from "../pages/ImpostazioniPdfPage";
+import { defaultPdf, leggiLogo } from "../components/pdfPersonalizzazione";
 beforeEach(() => {
   localStorage.clear();
   Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
@@ -32,7 +28,6 @@ beforeEach(() => {
     value: vi.fn(),
   });
 });
-const pdf = () => new Blob(["%PDF-1.7"], { type: "application/pdf" });
 const anteprima = () => ({
   pdfBase64: "JVBERi0xLjc=",
   pagine: ["data:image/png;base64,AA=="],
@@ -44,9 +39,11 @@ describe("Editor PDF", () => {
     const click = vi
       .spyOn(HTMLAnchorElement.prototype, "click")
       .mockImplementation(function (this: HTMLAnchorElement) {
-        expect(this.download).toBe("confronto-42.pdf");
+        expect(this.download).toBe("confronto-0.pdf");
       });
-    const view = render(<PdfEditor id={42} onClose={vi.fn()} />);
+    const view = render(
+      <PdfEditor initialOptions={defaultPdf} onSave={vi.fn(async (o) => o)} />,
+    );
     await screen.findByText("PDF aggiornato · formato A4");
     await userEvent.click(
       screen.getByRole("radio", { name: /Sintesi cliente/ }),
@@ -59,7 +56,7 @@ describe("Editor PDF", () => {
     await userEvent.type(name, "Studio Test");
     await waitFor(() =>
       expect(post).toHaveBeenLastCalledWith(
-        "/confronti/42/pdf/anteprima",
+        "/impostazioni-pdf/anteprima",
         expect.objectContaining({
           stile: "SINTESI",
           colore: "#1E3A8A",
@@ -71,7 +68,7 @@ describe("Editor PDF", () => {
     await screen.findByText("PDF aggiornato · formato A4");
     const count = post.mock.calls.length;
     await userEvent.click(
-      screen.getByRole("button", { name: "Scarica PDF personalizzato" }),
+      screen.getByRole("button", { name: "Scarica PDF di esempio" }),
     );
     expect(click).toHaveBeenCalledOnce();
     expect(post).toHaveBeenCalledTimes(count);
@@ -91,11 +88,13 @@ describe("Editor PDF", () => {
       .spyOn(api, "post")
       .mockReturnValueOnce(first)
       .mockResolvedValue({ data: anteprima() });
-    render(<PdfEditor id={2} onClose={vi.fn()} />);
+    render(
+      <PdfEditor initialOptions={defaultPdf} onSave={vi.fn(async (o) => o)} />,
+    );
     await waitFor(() => expect(post).toHaveBeenCalledOnce());
     await userEvent.click(screen.getByRole("radio", { name: /Essenziale/ }));
     expect(
-      screen.getByRole("button", { name: "Scarica PDF personalizzato" }),
+      screen.getByRole("button", { name: "Scarica PDF di esempio" }),
     ).toHaveAttribute("aria-disabled", "true");
     await screen.findByText("PDF aggiornato · formato A4");
     const count = vi.mocked(URL.createObjectURL).mock.calls.length;
@@ -110,27 +109,71 @@ describe("Editor PDF", () => {
         new Error("Servizio temporaneamente indisponibile"),
       )
       .mockResolvedValue({ data: anteprima() });
-    render(<PdfEditor id={3} onClose={vi.fn()} />);
+    render(
+      <PdfEditor initialOptions={defaultPdf} onSave={vi.fn(async (o) => o)} />,
+    );
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Servizio temporaneamente indisponibile",
     );
     await userEvent.click(screen.getByRole("button", { name: "Riprova" }));
     await screen.findByText("PDF aggiornato · formato A4");
   });
-  it("riutilizza le preferenze nel download dal risultato", async () => {
-    salvaPdfOptions({ ...defaultPdf, stile: "EDITORIALE", colore: "#6B21A8" });
-    const post = vi.spyOn(api, "post").mockResolvedValue({ data: pdf() });
-    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
-    render(<ScaricaPdf id={8} />);
+  it("salva solo su richiesta, ricarica dal server e mantiene la bozza se il salvataggio fallisce", async () => {
+    vi.spyOn(api, "get").mockResolvedValue({
+      data: { opzioni: defaultPdf, versione: 4 },
+    });
+    vi.spyOn(api, "post").mockResolvedValue({ data: anteprima() });
+    const put = vi
+      .spyOn(api, "put")
+      .mockRejectedValueOnce(new Error("Salvataggio non riuscito"))
+      .mockImplementation(async (_url, body) => ({
+        data: { ...(body as object), versione: 5 },
+      }));
+    render(<ImpostazioniPdfPage />);
+    await screen.findByText("PDF aggiornato · formato A4");
     await userEvent.click(
-      screen.getByRole("button", { name: /^Scarica PDF$/ }),
+      screen.getByRole("button", { name: "Viola Premium" }),
     );
-    expect(post).toHaveBeenCalledWith(
-      "/confronti/8/pdf",
-      expect.objectContaining({ stile: "EDITORIALE", colore: "#6B21A8" }),
-      { responseType: "blob" },
+    expect(put).not.toHaveBeenCalled();
+    expect(screen.getByText("Modifiche non salvate")).toBeVisible();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Salva impostazioni PDF" }),
     );
-    localStorage.clear();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Salvataggio non riuscito",
+    );
+    expect(screen.getByLabelText(/Codice colore/)).toHaveValue("#6B21A8");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Salva impostazioni PDF" }),
+    );
+    await screen.findByText(/Impostazioni PDF salvate/);
+    expect(put).toHaveBeenLastCalledWith("/impostazioni-pdf", {
+      opzioni: expect.objectContaining({ colore: "#6B21A8" }),
+      versione: 4,
+    });
+  });
+  it("mostra un solo foglio alla volta e cambia pagina con le frecce", async () => {
+    vi.spyOn(api, "post").mockResolvedValue({
+      data: {
+        ...anteprima(),
+        pagine: ["data:image/png;base64,AA==", "data:image/png;base64,BB=="],
+      },
+    });
+    render(
+      <PdfEditor initialOptions={defaultPdf} onSave={vi.fn(async (o) => o)} />,
+    );
+    await screen.findByText("PDF aggiornato · formato A4");
+    expect(screen.getAllByAltText(/Anteprima PDF/)).toHaveLength(1);
+    expect(
+      screen.getByRole("button", { name: "Pagina precedente" }),
+    ).toBeDisabled();
+    await userEvent.click(
+      screen.getByRole("button", { name: "Pagina successiva" }),
+    );
+    expect(screen.getByAltText("Anteprima PDF · pagina 2 di 2")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Pagina successiva" }),
+    ).toBeDisabled();
   });
   it("rifiuta loghi non supportati o troppo grandi", async () => {
     await expect(

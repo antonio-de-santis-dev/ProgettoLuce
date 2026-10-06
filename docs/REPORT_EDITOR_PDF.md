@@ -2,7 +2,7 @@
 
 ## Funzioni
 
-Accesso con **Personalizza PDF** nel risultato e nei confronti dello storico. Controlli a sinistra e PDF effettivo a destra; su mobile le sezioni sono in verticale.
+Sezione **Impostazioni PDF** nel menu, raggiungibile anche dal risultato e dallo storico. Salvataggio esplicito nel database con **Salva impostazioni PDF**. Controlli a sinistra e PDF effettivo a destra; su mobile le sezioni sono in verticale.
 
 | Stile | Presentazione |
 | --- | --- |
@@ -24,23 +24,21 @@ Riquadro consulente con nome/studio, ruolo, email, telefono e indirizzo. Dati in
 - `POST /api/confronti/{id}/pdf` e `POST /api/confronti/{id}/pdf/anteprima`: opzioni di presentazione validate, stesso snapshot del GET. Il download restituisce il PDF; l’anteprima restituisce JSON con PDF e pagine PNG. Entrambe le risposte disabilitano la cache.
 - Anteprima dopo 400 ms di inattività; annullamento richieste e protezione dalle risposte obsolete.
 - Download nell’editor dal blob già visualizzato, disponibile solo quando corrisponde alle impostazioni correnti.
-- Preferenze e logo memorizzati esclusivamente nel browser; riutilizzati dal download normale del risultato e dello storico. Ripristino alle impostazioni iniziali disponibile.
-- Anteprima con tutte le pagine PNG renderizzate dal PDF sul server: funziona senza plugin del browser. La risposta contiene anche i byte dello stesso PDF, usati dal download e dal collegamento in nuova scheda.
-- Nginx: limite corpo API 2 MB per il logo codificato. Nessuna migration o nuova dipendenza.
+- Preferenze e logo salvati nel database tramite GET/PUT `/api/impostazioni-pdf`, con controllo della versione. Tutti i download GET applicano automaticamente l’ultima configurazione salvata. Una bozza non viene applicata finché non si preme Salva. Ripristino disponibile come bozza da salvare.
+- Anteprima dimostrativa tramite `/api/impostazioni-pdf/anteprima`, senza creare confronti: un solo foglio A4 intero alla volta con frecce e numero pagina. Le pagine PNG sono renderizzate dal PDF sul server: funziona senza plugin del browser. La risposta contiene anche i byte dello stesso PDF, usati dal download e dal collegamento in nuova scheda.
+- Nginx: limite corpo API 2 MB per il logo codificato. Migration V2 per la tabella `impostazioni_pdf`; nessuna nuova dipendenza.
 
 ## Verifiche
 
-- 42 test backend superati: importi dello snapshot, quattro stili, logo incorporato, contatti, validazione colore/stile/testi, immagini corrotte e limiti delle dimensioni.
-- 17 test frontend superati: personalizzazione, download dal blob dell’anteprima, risposte obsolete, errori e nuovo tentativo, preferenze nel download standard e rifiuto dei loghi non validi.
+- 44 test backend superati: importi dello snapshot, quattro stili, logo incorporato, contatti, validazione colore/stile/testi, immagini corrotte e limiti delle dimensioni.
+- 18 test frontend superati: personalizzazione, download dal blob dell’anteprima, risposte obsolete, errori e nuovo tentativo, preferenze nel download standard e rifiuto dei loghi non validi.
 - Package Java e build TypeScript/Vite completati.
 - Quattro PDF con logo e dati consulente renderizzati; controllo del testo nei limiti delle pagine. Il report personalizzato di esempio si sviluppa su tre pagine.
 - Playwright eseguito sulla build di produzione, con la stessa CSP di Nginx e controllo degli errori CSP. Flusso esteso con selezione stile/colore, dati consulente, caricamento logo, anteprima, download personalizzato, screenshot desktop/mobile e download storico.
-- Verifica Compose estesa al POST personalizzato tramite Nginx e all’anteprima raster. La [CI della versione verificata](https://github.com/antonio-de-santis-dev/ProgettoLuce/actions/runs/37447150009) è terminata con successo il 6 ottobre 2026: backend H2/PostgreSQL, frontend e Docker Compose.
+- Verifica Compose estesa alla configurazione salvata, all’anteprima raster e alla persistenza di impostazioni/logo dopo la ricreazione dei container. Verifica della versione aggiornata in corso.
 
-Gli screenshot finali desktop e mobile sono stati controllati visivamente. L’anteprima mostra le pagine effettive; il download rimane visibile anche nel viewport desktop 1280 × 600. Il PDF scaricato dal browser ha tre pagine, logo e dati personalizzati, importi 77,00 € / 123,00 € / 1.476,00 € verificati e nessun testo fuori dalla pagina. Download storico e persistenza dopo la ricreazione dei container verificati.
-
-Implementazione completata sul branch `feat/editor-pdf`, PR #3, basata sulla PR #2.
+La correzione aggiunge una sezione autonoma, salvataggio nel database e visualizzazione di un foglio intero alla volta. Il precedente flusso nel dialogo e la memorizzazione locale sono sostituiti da questo comportamento.
 
 ## Limiti
 
-Le preferenze sono comuni ai report del browser corrente: non sono sincronizzate tra dispositivi e non sono salvate per singolo confronto. Il PDF viene sempre ricreato dai dati economici salvati e dalle preferenze correnti. Dati del consulente e logo non sono un profilo autenticato né una firma digitale. L’anteprima usa immagini PNG a 108 DPI; il file PDF mantiene testo vettoriale e font incorporati. Il rendering viene eseguito sul server, senza archiviare le immagini.
+La configurazione PDF è condivisa nel workspace e disponibile da qualsiasi browser collegato allo stesso backend. Non è ancora associata a un account individuale e non è salvata per singolo confronto. Il PDF viene sempre ricreato dai dati economici salvati e dalla configurazione salvata corrente. Dati del consulente e logo non sono un profilo autenticato né una firma digitale. L’anteprima usa immagini PNG a 108 DPI; il file PDF mantiene testo vettoriale e font incorporati. Il rendering viene eseguito sul server, senza archiviare le immagini.

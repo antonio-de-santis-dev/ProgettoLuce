@@ -5,17 +5,18 @@ import {
   LoaderCircle,
   RotateCcw,
   Upload,
+  Save,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { api } from "../api";
-import { Campo, Dialogo, Errore } from "./ui";
+import { Campo, Errore } from "./ui";
 import {
   coloriPdf,
   defaultPdf,
   downloadPdf,
   errorePdf,
   leggiLogo,
-  leggiPdfOptions,
-  salvaPdfOptions,
   stiliPdf,
   decodificaAnteprima,
   type PdfAnteprima,
@@ -23,15 +24,21 @@ import {
 } from "./pdfPersonalizzazione";
 
 export default function PdfEditor({
-  id,
-  onClose,
+  initialOptions,
+  onSave,
 }: {
-  id: number;
-  onClose: () => void;
+  initialOptions: PdfOptions;
+  onSave: (options: PdfOptions) => Promise<PdfOptions>;
 }) {
-  const [options, setOptions] = useState<PdfOptions>(
-    () => leggiPdfOptions() ?? structuredClone(defaultPdf),
+  const [options, setOptions] = useState<PdfOptions>(() =>
+    structuredClone(initialOptions),
   );
+  const [savedSettings, setSavedSettings] = useState(
+    JSON.stringify(initialOptions),
+  );
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [page, setPage] = useState(0);
   const [hex, setHex] = useState(options.colore);
   const [preview, setPreview] = useState<{
     blob: Blob;
@@ -62,7 +69,7 @@ export default function PdfEditor({
     const timer = window.setTimeout(async () => {
       try {
         const { data } = await api.post<PdfAnteprima>(
-          `/confronti/${id}/pdf/anteprima`,
+          "/impostazioni-pdf/anteprima",
           JSON.parse(settings),
           { signal: controller.signal },
         );
@@ -85,28 +92,43 @@ export default function PdfEditor({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [id, settings, retry]);
+  }, [settings, retry]);
   useEffect(
     () => () => {
       if (preview) URL.revokeObjectURL(preview.url);
     },
     [preview],
   );
-  useEffect(() => {
-    try {
-      salvaPdfOptions(options);
-    } catch {
-      setNotice(
-        "Le impostazioni funzionano per questa sessione, ma il browser non può memorizzarle.",
-      );
-    }
-  }, [options]);
   useEffect(
     () => () => {
       logoVersion.current++;
     },
     [],
   );
+  const dirty = settings !== savedSettings || !hexValid;
+  const currentPage = preview ? Math.min(page, preview.pagine.length - 1) : 0;
+  async function salva() {
+    if (!hexValid || logoBusy || saving) {
+      setSaveError(
+        "Controlla il colore e attendi il caricamento del logo prima di salvare.",
+      );
+      return;
+    }
+    setSaving(true);
+    setSaveError("");
+    setNotice("");
+    try {
+      const saved = await onSave(structuredClone(options));
+      setSavedSettings(JSON.stringify(saved));
+      setNotice(
+        "Impostazioni PDF salvate. I prossimi report useranno questa configurazione.",
+      );
+    } catch (e) {
+      setSaveError(await errorePdf(e));
+    } finally {
+      setSaving(false);
+    }
+  }
   function colore(value: string) {
     setHex(value);
     if (/^#[\da-f]{6}$/i.test(value))
@@ -145,16 +167,15 @@ export default function PdfEditor({
     setHex(defaultPdf.colore);
   }
   return (
-    <Dialogo
-      title="Personalizza il PDF"
-      onClose={onClose}
-      className="pdf-editor"
+    <section
+      className="pdf-settings-editor"
+      aria-label="Editor impostazioni PDF"
     >
       <div className="pdf-editor-intro">
         <FileText size={20} />
         <p>
-          Imposta il tuo report. L’anteprima a destra mostra il PDF che
-          scaricherai.
+          Documento dimostrativo. Salva le impostazioni per applicarle ai
+          prossimi report, anche dallo storico.
         </p>
       </div>
       <div className="pdf-editor-grid">
@@ -338,8 +359,8 @@ export default function PdfEditor({
             Ripristina impostazioni
           </button>
           <p className="help">
-            Preferenze e logo sono memorizzati in questo browser. I dati del
-            confronto restano quelli salvati.
+            Stile, colori, logo e recapiti vengono salvati nel sistema solo
+            quando premi Salva impostazioni PDF.
           </p>
         </div>
         <section className="pdf-preview" aria-label="Anteprima del PDF">
@@ -368,19 +389,12 @@ export default function PdfEditor({
             aria-busy={!ready && !error}
           >
             {preview ? (
-              <div className="pdf-preview-pages">
-                {preview.pagine.map((page, index) => (
-                  <figure key={index}>
-                    <img
-                      src={page}
-                      alt={`Anteprima PDF · pagina ${index + 1} di ${preview.pagine.length}`}
-                    />
-                    <figcaption>
-                      Pagina {index + 1} di {preview.pagine.length}
-                    </figcaption>
-                  </figure>
-                ))}
-              </div>
+              <figure className="pdf-preview-sheet">
+                <img
+                  src={preview.pagine[currentPage]}
+                  alt={`Anteprima PDF · pagina ${currentPage + 1} di ${preview.pagine.length}`}
+                />
+              </figure>
             ) : (
               <div className="pdf-preview-empty">
                 <FileText size={40} />
@@ -388,6 +402,34 @@ export default function PdfEditor({
               </div>
             )}
           </div>
+          {preview && (
+            <div
+              className="pdf-page-navigation"
+              aria-label="Pagine dell’anteprima"
+            >
+              <button
+                type="button"
+                className="button secondary compact"
+                aria-label="Pagina precedente"
+                disabled={currentPage === 0}
+                onClick={() => setPage(currentPage - 1)}
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <span>
+                Pagina {currentPage + 1} di {preview.pagine.length}
+              </span>
+              <button
+                type="button"
+                className="button secondary compact"
+                aria-label="Pagina successiva"
+                disabled={currentPage === preview.pagine.length - 1}
+                onClick={() => setPage(currentPage + 1)}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
           {preview && (
             <a
               className="text-button"
@@ -399,18 +441,21 @@ export default function PdfEditor({
             </a>
           )}
           <p className="help">
-            Scorri l’anteprima per leggere tutte le pagine. La vista mostra le
-            pagine del PDF effettivo, anche su telefono.
+            Un foglio intero alla volta. Usa le frecce per cambiare pagina. Il
+            documento è un esempio grafico e non viene salvato nello storico.
           </p>
         </section>
       </div>
+      {saveError && <Errore message={saveError} />}
       <footer className="pdf-editor-footer">
         <p role="status">
-          {notice || "Le impostazioni sono riutilizzate nei prossimi report."}
+          {dirty
+            ? "Modifiche non salvate"
+            : notice || "Configurazione salvata nel sistema"}
         </p>
         <button
           type="button"
-          className="button primary"
+          className="button secondary"
           aria-disabled={!ready}
           onClick={() => {
             if (!ready || !preview) {
@@ -419,14 +464,27 @@ export default function PdfEditor({
               );
               return;
             }
-            downloadPdf(preview.blob, id);
+            downloadPdf(preview.blob, 0);
             setNotice("Download PDF avviato.");
           }}
         >
           <Download size={18} />
-          Scarica PDF personalizzato
+          Scarica PDF di esempio
+        </button>
+        <button
+          type="button"
+          className="button primary"
+          aria-disabled={saving || !hexValid || logoBusy}
+          onClick={() => void salva()}
+        >
+          {saving ? (
+            <LoaderCircle className="spin" size={18} />
+          ) : (
+            <Save size={18} />
+          )}
+          {saving ? "Salvataggio…" : "Salva impostazioni PDF"}
         </button>
       </footer>
-    </Dialogo>
+    </section>
   );
 }

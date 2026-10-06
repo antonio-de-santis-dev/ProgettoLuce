@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
+import { MemoryRouter } from "react-router-dom";
 import { api } from "../api";
 import ScaricaPdf from "../components/ScaricaPdf";
 
@@ -24,7 +25,11 @@ describe("Download PDF", () => {
         expect(this.download).toBe("confronto-42.pdf");
         expect(this.href).toBe("blob:test-pdf");
       });
-    render(<ScaricaPdf id={42} />);
+    render(
+      <MemoryRouter>
+        <ScaricaPdf id={42} />
+      </MemoryRouter>,
+    );
     await userEvent.click(screen.getByRole("button", { name: "Scarica PDF" }));
     expect(api.get).toHaveBeenCalledWith("/confronti/42/pdf", {
       responseType: "blob",
@@ -48,7 +53,11 @@ describe("Download PDF", () => {
       isAxiosError: true,
       response: { data: blob },
     });
-    render(<ScaricaPdf id={7} />);
+    render(
+      <MemoryRouter>
+        <ScaricaPdf id={7} />
+      </MemoryRouter>,
+    );
     await userEvent.click(screen.getByRole("button", { name: "Scarica PDF" }));
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Confronto non trovato",
@@ -60,7 +69,11 @@ describe("Download PDF", () => {
     vi.spyOn(api, "get").mockResolvedValue({
       data: new Blob(["{}"], { type: "application/json" }),
     });
-    render(<ScaricaPdf id={3} />);
+    render(
+      <MemoryRouter>
+        <ScaricaPdf id={3} />
+      </MemoryRouter>,
+    );
     await userEvent.click(screen.getByRole("button", { name: "Scarica PDF" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("PDF valido");
   });

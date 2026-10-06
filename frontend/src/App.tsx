@@ -16,12 +16,14 @@ import OffertePage from "./pages/OffertePage";
 import BollettePage from "./pages/BollettePage";
 import ParametriPage from "./pages/ParametriPage";
 import StoricoPage from "./pages/StoricoPage";
+import ImpostazioniPdfPage from "./pages/ImpostazioniPdfPage";
 
 const nav = [
   { to: "/", label: "Confronto", icon: ArrowLeftRight },
   { to: "/bollette", label: "Bollette clienti", icon: FileText },
   { to: "/offerte", label: "Offerte", icon: Tags },
   { to: "/parametri", label: "Parametri gestore", icon: SlidersHorizontal },
+  { to: "/impostazioni-pdf", label: "Impostazioni PDF", icon: FileText },
   { to: "/storico", label: "Storico", icon: History },
 ];
 export default function App() {
@@ -123,6 +125,7 @@ export default function App() {
             <Route path="/offerte" element={<OffertePage />} />
             <Route path="/bollette" element={<BollettePage />} />
             <Route path="/parametri" element={<ParametriPage />} />
+            <Route path="/impostazioni-pdf" element={<ImpostazioniPdfPage />} />
             <Route path="/storico" element={<StoricoPage />} />
             <Route
               path="*"

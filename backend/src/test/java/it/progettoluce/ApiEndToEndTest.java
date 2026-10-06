@@ -36,7 +36,17 @@ class ApiEndToEndTest {
   @Autowired PlatformTransactionManager tm;
 
   @BeforeEach
-  void pulisci() {
+  void pulisci() throws Exception {
+    var opzioni =
+        new it.progettoluce.confronti.PdfPersonalizzazione(
+            it.progettoluce.confronti.PdfPersonalizzazione.Stile.CLASSICO,
+            "#194D3D",
+            null,
+            new it.progettoluce.confronti.PdfPersonalizzazione.Consulente(
+                "", "", "", "", "", true));
+    jdbc.update(
+        "UPDATE impostazioni_pdf SET versione=0, configurazione=? WHERE id=1",
+        json.writeValueAsString(opzioni));
     for (String tabella :
         List.of(
             "confronti",
@@ -357,6 +367,89 @@ class ApiEndToEndTest {
     mvc.perform(post("/api/confronti/999999/pdf").contentType("application/json").content("{}"))
         .andExpect(status().isNotFound());
     mvc.perform(get("/api/confronti/999999/pdf")).andExpect(status().isNotFound());
+  }
+
+  @Test
+  void salvaImpostazioniPdfELeApplicaAutomaticamenteAlDownload() throws Exception {
+    var config =
+        json.readTree(
+            mvc.perform(get("/api/impostazioni-pdf"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString());
+    String request =
+        "{\"versione\":"
+            + config.get("versione")
+            + ",\"opzioni\":{\"stile\":\"SINTESI\",\"colore\":\"#6b21a8\",\"consulente\":{\"nome\":\"Studio"
+            + " Persistente\",\"dimostrativo\":true}}}";
+    mvc.perform(put("/api/impostazioni-pdf").contentType("application/json").content(request))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.opzioni.colore").value("#6B21A8"))
+        .andExpect(jsonPath("$.versione").value(1));
+    mvc.perform(get("/api/impostazioni-pdf"))
+        .andExpect(jsonPath("$.opzioni.consulente.nome").value("Studio Persistente"));
+    mvc.perform(put("/api/impostazioni-pdf").contentType("application/json").content(request))
+        .andExpect(status().isConflict());
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT configurazione FROM impostazioni_pdf WHERE id=1", String.class))
+        .contains("Studio Persistente", "#6B21A8");
+    salvaParametri();
+    long oid =
+        postJson(
+                "/api/offerte",
+                request(TipoOfferta.PREZZO_FISSO, TipoTariffa.MONORARIA, "0.1", null))
+            .get("id")
+            .asLong();
+    long bid = postJson("/api/bollette", bolletta()).get("id").asLong();
+    long cid =
+        postJson("/api/confronti", java.util.Map.of("bollettaId", bid, "offertaId", oid))
+            .get("id")
+            .asLong();
+    byte[] bytes =
+        mvc.perform(get("/api/confronti/" + cid + "/pdf"))
+            .andExpect(status().isOk())
+            .andReturn()
+            .getResponse()
+            .getContentAsByteArray();
+    try (var pdf = org.apache.pdfbox.Loader.loadPDF(bytes)) {
+      assertThat(new org.apache.pdfbox.text.PDFTextStripper().getText(pdf))
+          .contains("Studio Persistente", "Quanto puoi risparmiare", "77,00 €", "123,00 €");
+    }
+  }
+
+  @Test
+  void anteprimaImpostazioniFunzionaSenzaConfrontiENonSalvaLaBozza() throws Exception {
+    var initial =
+        mvc.perform(get("/api/impostazioni-pdf")).andReturn().getResponse().getContentAsString();
+    mvc.perform(
+            post("/api/impostazioni-pdf/anteprima")
+                .contentType("application/json")
+                .content("{\"stile\":\"EDITORIALE\",\"colore\":\"#1E3A8A\"}"))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
+        .andExpect(jsonPath("$.pagine[0]").exists());
+    assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM confronti", Integer.class)).isZero();
+    assertThat(
+            mvc.perform(get("/api/impostazioni-pdf"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString())
+        .isEqualTo(initial);
+    for (String invalid :
+        List.of(
+            "{\"opzioni\":{},\"versione\":-1}",
+            "{\"opzioni\":{\"colore\":\"rosso\"},\"versione\":0}",
+            "{\"opzioni\":{\"logo\":\"data:image/png;base64,invalid\"},\"versione\":0}"))
+      mvc.perform(put("/api/impostazioni-pdf").contentType("application/json").content(invalid))
+          .andExpect(status().isBadRequest());
+    assertThat(
+            mvc.perform(get("/api/impostazioni-pdf"))
+                .andReturn()
+                .getResponse()
+                .getContentAsString())
+        .isEqualTo(initial);
   }
 
   private ParametriRequest parametri() {

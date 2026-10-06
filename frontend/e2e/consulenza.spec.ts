@@ -82,7 +82,10 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
     fullPage: true,
     animations: "disabled",
   });
-  await page.getByRole("button", { name: "Personalizza PDF" }).click();
+  await page
+    .getByRole("navigation", { name: "Navigazione principale" })
+    .getByRole("link", { name: "Impostazioni PDF", exact: true })
+    .click();
   await expect(page.getByText("PDF aggiornato · formato A4")).toBeVisible();
   await page.getByRole("radio", { name: /Sintesi cliente/ }).check();
   await page.getByRole("button", { name: "Blu Istituzionale" }).click();
@@ -116,29 +119,48 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
     path: "test-results/editor-pdf-desktop.png",
     animations: "disabled",
   });
-  await page.setViewportSize({ width: 1280, height: 600 });
+  expect(await page.locator(".pdf-preview-sheet").count()).toBe(1);
+  const sheet = await page.locator(".pdf-preview-sheet").boundingBox();
+  const previewArea = await page.locator(".pdf-preview-document").boundingBox();
+  expect(
+    sheet &&
+      previewArea &&
+      sheet.y >= previewArea.y &&
+      sheet.y + sheet.height <= previewArea.y + previewArea.height + 1,
+  ).toBeTruthy();
+  await page.getByRole("button", { name: "Pagina successiva" }).click();
   await expect(
-    page.getByRole("button", { name: "Scarica PDF personalizzato" }),
-  ).toBeInViewport();
+    page.getByAltText("Anteprima PDF · pagina 2 di 3"),
+  ).toBeVisible();
+  expect(await page.locator(".pdf-preview-sheet").count()).toBe(1);
+  await page.getByRole("button", { name: "Pagina precedente" }).click();
+  await page.getByRole("button", { name: "Salva impostazioni PDF" }).click();
+  await expect(page.getByText(/Impostazioni PDF salvate/)).toBeVisible();
+  await page.evaluate(() => localStorage.clear());
+  await page.reload();
+  await expect(page.getByLabel("Nome o studio")).toHaveValue(
+    "Studio Browser PDF",
+  );
+  await expect(page.getByLabel("Codice colore")).toHaveValue("#1E3A8A");
+  await expect(page.getByAltText("Logo scelto per il report")).toBeVisible();
   const customDownloadPromise = page.waitForEvent("download");
-  await page
-    .getByRole("button", { name: "Scarica PDF personalizzato" })
-    .click();
+  await page.getByRole("button", { name: "Scarica PDF di esempio" }).click();
   const customDownload = await customDownloadPromise;
-  await customDownload.saveAs("test-results/confronto-personalizzato.pdf");
+  await customDownload.saveAs("test-results/pdf-esempio-impostazioni.pdf");
   expect(await customDownload.failure()).toBeNull();
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page
-      .locator(".pdf-editor")
+      .locator(".pdf-settings-editor")
       .evaluate((e) => e.scrollWidth <= e.clientWidth + 1),
   ).toBeTruthy();
   await page.screenshot({
     path: "test-results/editor-pdf-mobile.png",
     animations: "disabled",
   });
-  await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await page.getByRole("button", { name: "Apri menu" }).click();
+  await page.getByRole("link", { name: "Storico", exact: true }).click();
+  await page.getByRole("button", { name: "Apri", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect
     .poll(() =>
@@ -164,19 +186,14 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
     fullPage: true,
     animations: "disabled",
   });
-  await page.getByRole("button", { name: "Apri menu" }).click();
-  await page.getByRole("link", { name: "Storico", exact: true }).click();
-  await expect(
-    page.getByText("Cliente Browser", { exact: true }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Apri", exact: true }).click();
   await expect(
     page.getByRole("region", { name: "Risultato del confronto" }),
   ).toContainText("77,00");
   const storicoDownloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Scarica PDF", exact: true }).click();
-  expect((await storicoDownloadPromise).suggestedFilename()).toBe(
-    download.suggestedFilename(),
-  );
+  const storicoPdf = await storicoDownloadPromise;
+  expect(storicoPdf.suggestedFilename()).toBe(download.suggestedFilename());
+  await storicoPdf.saveAs("test-results/confronto-personalizzato.pdf");
+  expect(await storicoPdf.failure()).toBeNull();
   expect(errors).toEqual([]);
 });

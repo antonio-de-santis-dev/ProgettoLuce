@@ -58,40 +58,6 @@ export const defaultPdf: PdfOptions = {
     dimostrativo: true,
   },
 };
-const key = "progetto-luce-pdf-v1";
-export function leggiPdfOptions(): PdfOptions | null {
-  try {
-    const data = JSON.parse(localStorage.getItem(key) || "null");
-    if (
-      !data ||
-      !stiliPdf.some((s) => s.id === data.stile) ||
-      !/^#[\da-f]{6}$/i.test(data.colore)
-    )
-      return null;
-    if (
-      data.logo !== null &&
-      (typeof data.logo !== "string" ||
-        data.logo.length > 1400000 ||
-        !/^data:image\/(png|jpeg);base64,/.test(data.logo))
-    )
-      return null;
-    const c = data.consulente;
-    if (
-      !c ||
-      typeof c.dimostrativo !== "boolean" ||
-      !["nome", "ruolo", "email", "telefono", "indirizzo"].every(
-        (k) => typeof c[k] === "string",
-      )
-    )
-      return null;
-    return data;
-  } catch {
-    return null;
-  }
-}
-export function salvaPdfOptions(options: PdfOptions) {
-  localStorage.setItem(key, JSON.stringify(options));
-}
 export function downloadPdf(blob: Blob, id: number) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
