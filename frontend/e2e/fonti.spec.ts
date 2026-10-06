@@ -26,6 +26,10 @@ test("fonti ufficiali: inserimento manuale, storico e vista mobile", async ({
   await expect(
     page.getByText("Fixture sintetica browser", { exact: true }),
   ).toBeVisible();
+  await page.screenshot({
+    path: test.info().outputPath("fonti-desktop.png"),
+    fullPage: true,
+  });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(
     page.getByRole("heading", { name: "Fonti ufficiali", exact: true }),
@@ -35,4 +39,8 @@ test("fonti ufficiali: inserimento manuale, storico e vista mobile", async ({
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBeTruthy();
+  await page.screenshot({
+    path: test.info().outputPath("fonti-mobile.png"),
+    fullPage: true,
+  });
 });

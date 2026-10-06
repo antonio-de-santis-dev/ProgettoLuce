@@ -8,7 +8,24 @@ Il 6 ottobre 2026 la versione approvata del simulatore, dei PDF e dell’editor 
 
 La revisione ha coperto il motore decimale, le sei combinazioni prezzo fisso/PUN e mono/bi/trioraria, validazioni e conflitti di modifica, migrazioni e persistenza, snapshot dello storico, generazione/anteprima PDF, impostazioni salvate, interfaccia mobile e Docker. Il programma resta un simulatore per uso locale, non un sistema di fatturazione certificato; autenticazione e permessi per pubblicazione multiutente non sono ancora implementati.
 
-## Avvio del ramo
+## Avvio sulla porta abituale 8088
+
+La porta predefinita di `compose.yaml` resta **8088**. La 8089 indicata inizialmente era soltanto una scelta per l’ambiente di prova separato: i container già avviati sulla 8088 non cambiano versione finché non vengono ricompilati.
+
+Per aggiornare lo stack abituale conservando i suoi dati:
+
+```bash
+git fetch origin
+git switch integrazioneAPI
+git pull --ff-only origin integrazioneAPI
+mkdir -p backups
+docker compose exec -T postgres sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB"' > backups/pre-integrazione-api.sql
+docker compose up -d --build
+```
+
+Verifica nel tuo `.env` che `FRONTEND_PORT=8088`, poi apri `http://localhost:8088/fonti`. La migrazione V3 aggiorna il database esistente; il backup serve anche per un eventuale ritorno al vecchio codice main.
+
+## Ambiente di prova separato, facoltativo (8089)
 
 ```bash
 git fetch origin

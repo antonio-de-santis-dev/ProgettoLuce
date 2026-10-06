@@ -1,3 +1,4 @@
+import "../fonti.css";
 import { useEffect, useState, type FormEvent } from "react";
 import { RefreshCw, Save, RotateCcw, History } from "lucide-react";
 import { api, messaggioErrore, useLista } from "../api";
@@ -160,7 +161,7 @@ export default function FontiPage() {
     categoria === "INDICE" ? k.startsWith("PUN_") : !k.startsWith("PUN_"),
   );
   return (
-    <>
+    <div className="fonti-page">
       <Titolo
         eyebrow="Dati aggiornati, scelte trasparenti"
         title="Fonti ufficiali"
@@ -230,7 +231,7 @@ export default function FontiPage() {
           {notice}
         </p>
       )}
-      <section className="panel">
+      <section className="panel fonti-panel">
         <div className="panel-top">
           <div>
             <h2>Parametri per mese</h2>
@@ -317,25 +318,27 @@ export default function FontiPage() {
               <tbody>
                 {lista.data.map((d) => (
                   <tr key={d.id}>
-                    <td>
+                    <td data-label="Parametro">
                       <strong>{nomi[d.codice] ?? d.codice}</strong>
                       <small>{d.unita}</small>
                     </td>
-                    <td>
+                    <td data-label="Valore usato">
                       {numero(d.valore, 8)}{" "}
                       {d.valoreManuale !== null && (
                         <span className="badge">Manuale</span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Valore ufficiale">
                       {d.valoreUfficiale === null
                         ? "—"
                         : numero(d.valoreUfficiale, 8)}
                     </td>
-                    <td>
+                    <td data-label="Fonte">
                       {d.url ? (
                         <a href={d.url} target="_blank" rel="noreferrer">
-                          {d.fonte}
+                          {d.fonte === "PORTALE_OFFERTE"
+                            ? "Portale Offerte"
+                            : d.fonte}
                         </a>
                       ) : (
                         "Manuale"
@@ -344,7 +347,7 @@ export default function FontiPage() {
                         {d.pubblicatoIl ? `Pubblicato ${d.pubblicatoIl}` : ""}
                       </small>
                     </td>
-                    <td>
+                    <td data-label="Azioni">
                       <div className="fonti-actions">
                         {categoria !== "ORIGINALE" && (
                           <button
@@ -378,7 +381,7 @@ export default function FontiPage() {
         )}
       </section>
       {categoria !== "ORIGINALE" && (
-        <form className="panel" onSubmit={salva}>
+        <form className="panel fonti-panel fonti-form" onSubmit={salva}>
           <div className="panel-top">
             <h2>
               {edit
@@ -464,7 +467,7 @@ export default function FontiPage() {
         </form>
       )}
       {revisioni && (
-        <section className="panel">
+        <section className="panel fonti-panel">
           <div className="panel-top">
             <h2>Storico · {titoloStorico}</h2>
             <button
@@ -498,6 +501,6 @@ export default function FontiPage() {
           )}
         </section>
       )}
-    </>
+    </div>
   );
 }

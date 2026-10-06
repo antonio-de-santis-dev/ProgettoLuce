@@ -11,3 +11,5 @@ frontend/test-results/
 frontend/playwright-report/
 **/*.tsbuildinfo
 **/__pycache__/
+
+/backups/

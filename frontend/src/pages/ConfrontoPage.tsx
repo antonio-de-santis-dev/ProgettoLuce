@@ -1,3 +1,4 @@
+import "../fonti.css";
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -200,7 +201,8 @@ export default function ConfrontoPage() {
                 {busy ? "Calcolo…" : "Calcola confronto"}
               </button>
             </div>
-            <div className="fonti-choice">
+            <details className="fonti-choice">
+              <summary>Parametri del confronto</summary>
               <label>
                 <input
                   type="checkbox"
@@ -256,7 +258,7 @@ export default function ConfrontoPage() {
                   Il confronto usa il profilo manuale e il PUN della bolletta.
                 </p>
               )}
-            </div>
+            </details>
             {selected && (
               <p className="help">
                 {numero(consumo(selected.dati), 3)} kWh ·{" "}
