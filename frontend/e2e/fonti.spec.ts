@@ -26,7 +26,9 @@ test("fonti ufficiali: inserimento manuale, storico e vista mobile", async ({
   await expect(
     page.getByText("Fixture sintetica browser", { exact: true }),
   ).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.screenshot({
+    animations: "disabled",
     path: test.info().outputPath("fonti-desktop.png"),
     fullPage: true,
   });
@@ -40,6 +42,7 @@ test("fonti ufficiali: inserimento manuale, storico e vista mobile", async ({
     ),
   ).toBeTruthy();
   await page.screenshot({
+    animations: "disabled",
     path: test.info().outputPath("fonti-mobile.png"),
     fullPage: true,
   });

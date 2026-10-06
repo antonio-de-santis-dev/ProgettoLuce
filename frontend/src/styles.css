@@ -105,6 +105,8 @@ small {
   color: #dae5de;
   padding: 35px 22px;
   position: fixed;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   inset: 0 auto 0 0;
   display: flex;
   flex-direction: column;
