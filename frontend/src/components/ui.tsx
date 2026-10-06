@@ -58,7 +58,9 @@ export function Dialogo({
   title,
   children,
   onClose,
+  className = "",
 }: {
+  className?: string;
   title: string;
   children: ReactNode;
   onClose: () => void;
@@ -71,7 +73,12 @@ export function Dialogo({
     return () => dialog?.close();
   }, []);
   return (
-    <dialog ref={ref} className="modal" aria-labelledby={id} onCancel={onClose}>
+    <dialog
+      ref={ref}
+      className={`modal ${className}`}
+      aria-labelledby={id}
+      onCancel={onClose}
+    >
       <header>
         <h2 id={id}>{title}</h2>
         <button

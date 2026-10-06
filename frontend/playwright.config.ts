@@ -18,7 +18,7 @@ export default defineConfig({
       timeout: 60000,
     },
     {
-      command: "npm run dev -- --port 5174",
+      command: "npm run preview -- --host 127.0.0.1 --port 5174",
       url: "http://127.0.0.1:5174",
       env: { LUCE_API_TARGET: "http://127.0.0.1:8081" },
       timeout: 60000,

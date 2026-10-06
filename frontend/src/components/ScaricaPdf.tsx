@@ -1,8 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
-import { Download, LoaderCircle } from "lucide-react";
-import { api, messaggioErrore } from "../api";
+import { Download, LoaderCircle, SlidersHorizontal } from "lucide-react";
+import { api } from "../api";
 import { Errore } from "./ui";
+import { Link } from "react-router-dom";
+import { downloadPdf, errorePdf, verificaPdf } from "./pdfPersonalizzazione";
 
 export default function ScaricaPdf({ id }: { id: number }) {
   const [busy, setBusy] = useState(false);
@@ -16,37 +17,21 @@ export default function ScaricaPdf({ id }: { id: number }) {
       const { data } = await api.get<Blob>(`/confronti/${id}/pdf`, {
         responseType: "blob",
       });
-      if (!data.type.includes("application/pdf"))
-        throw new Error("Il server non ha restituito un PDF valido.");
-      const url = URL.createObjectURL(data);
-      try {
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `confronto-${id}.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        setNotice("Download PDF avviato.");
-      } finally {
-        window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }
+      verificaPdf(data);
+      downloadPdf(data, id);
+      setNotice("Download PDF avviato.");
     } catch (e) {
-      let message = messaggioErrore(e);
-      if (axios.isAxiosError(e) && e.response?.data instanceof Blob) {
-        try {
-          const data = JSON.parse(await e.response.data.text());
-          if (typeof data.message === "string") message = data.message;
-        } catch {
-          /* Keep the generic error when the response is not JSON. */
-        }
-      }
-      setError(message);
+      setError(await errorePdf(e));
     } finally {
       setBusy(false);
     }
   }
   return (
     <div className="pdf-download">
+      <Link className="button secondary" to="/impostazioni-pdf">
+        <SlidersHorizontal size={18} />
+        Impostazioni PDF
+      </Link>
       <button
         type="button"
         className="button secondary"

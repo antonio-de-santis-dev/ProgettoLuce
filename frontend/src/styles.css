@@ -702,6 +702,7 @@ legend small {
   margin: 12px auto 25px;
 }
 .table-scroll {
+  position: relative;
   overflow: auto;
 }
 table {
@@ -1246,5 +1247,614 @@ td {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* PDF editor: settings on the left, actual printable document on the right. */
+.modal.pdf-editor {
+  height: min(900px, calc(100dvh - 32px));
+  width: min(1400px, calc(100vw - 32px));
+  max-width: none;
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  overflow: hidden;
+}
+.modal.pdf-editor[open] {
+  display: flex;
+  flex-direction: column;
+}
+.pdf-editor > header {
+  flex-shrink: 0;
+  padding: 20px 24px;
+  margin: 0;
+  border-bottom: 1px solid var(--border);
+}
+.pdf-editor-intro {
+  flex-shrink: 0;
+  display: flex;
+  gap: 12px;
+  padding: 12px 24px;
+  color: var(--muted);
+  background: #f7f8f5;
+  font-size: 14px;
+}
+.pdf-editor-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  overflow: hidden;
+  height: auto;
+}
+.pdf-editor-controls {
+  min-height: 0;
+  padding: 24px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.pdf-control-section {
+  margin: 0;
+  padding: 0 0 24px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+}
+.pdf-control-section legend {
+  font-size: 16px;
+  font-weight: 750;
+  margin-bottom: 12px;
+}
+.pdf-control-section .help {
+  margin: 8px 0 12px;
+}
+.pdf-control-section .field {
+  margin-top: 12px;
+}
+.pdf-style-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.pdf-style {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  cursor: pointer;
+  background: #fff;
+}
+.pdf-style.selected {
+  border: 2px solid var(--primary);
+  padding: 11px;
+  box-shadow: 0 0 0 2px #194d3d10;
+}
+.pdf-style input {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  accent-color: var(--primary);
+  width: 16px;
+  height: 16px;
+}
+.pdf-style:focus-within {
+  outline: 3px solid #819437;
+  outline-offset: 2px;
+}
+.pdf-style small {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.pdf-style-mini {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  height: 68px;
+  padding: 8px;
+  background: #f4f6f3;
+  border-radius: 4px;
+  margin: 6px 0;
+}
+.pdf-style-mini i {
+  grid-column: 1 / -1;
+  background: var(--pdf-color);
+  height: 16px;
+}
+.pdf-style-mini b {
+  grid-column: 1 / -1;
+  background: #b8c3bc;
+  height: 3px;
+  width: 75%;
+}
+.pdf-style-mini em {
+  background: color-mix(in srgb, var(--pdf-color) 12%, white);
+  height: 14px;
+}
+.mini-essenziale i {
+  height: 2px;
+  margin: 8px 0;
+}
+.mini-essenziale em {
+  height: 2px;
+}
+.mini-editoriale {
+  border-left: 4px solid var(--pdf-color);
+}
+.mini-editoriale i {
+  height: 8px;
+  width: 70%;
+}
+.mini-sintesi i {
+  background: color-mix(in srgb, var(--pdf-color) 15%, white);
+  border-bottom: 3px solid var(--pdf-color);
+}
+.pdf-swatches {
+  display: grid;
+  gap: 6px;
+}
+.pdf-swatches button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid transparent;
+  background: #fff;
+  padding: 8px;
+  min-height: 44px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 13px;
+  color: #20332b;
+}
+.pdf-swatches button[aria-pressed="true"] {
+  border-color: var(--primary);
+  background: #f0f4eb;
+}
+.pdf-swatches button:hover {
+  background: #f0f4eb;
+}
+.pdf-swatches span {
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  border: 1px solid #0002;
+  flex: none;
+}
+.pdf-swatches b {
+  margin-left: auto;
+}
+.pdf-color-custom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+.pdf-color-custom > label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+.pdf-color-custom input[type="color"] {
+  width: 100%;
+  height: 44px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.pdf-logo-upload {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 16px;
+  border: 1px dashed #a8b7ae;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.pdf-logo-upload input {
+  max-width: 100%;
+  font-size: 12px;
+}
+.pdf-logo-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.pdf-logo-preview img {
+  width: 80px;
+  height: 64px;
+  object-fit: contain;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px;
+}
+.pdf-demo-check {
+  display: flex;
+  gap: 8px;
+  align-items: start;
+  margin-top: 16px;
+  font-size: 13px;
+}
+.pdf-demo-check input {
+  margin-top: 4px;
+  accent-color: var(--primary);
+}
+.pdf-preview {
+  min-height: 0;
+  overflow: hidden;
+  min-width: 0;
+  background: #e8ece8;
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.pdf-preview-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.pdf-preview-toolbar p {
+  font-size: 12px;
+  color: var(--muted);
+}
+.pdf-preview-document {
+  min-height: 0;
+  flex: 1;
+  border-radius: 6px;
+  overflow: auto;
+  box-shadow: 0 8px 24px #20332b15;
+  background: white;
+}
+.pdf-preview-document.updating {
+  opacity: 0.65;
+}
+.pdf-preview-document iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.pdf-preview-empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 16px;
+  height: 100%;
+  color: var(--muted);
+}
+.pdf-preview .help {
+  font-size: 12px;
+  margin: 0;
+}
+.pdf-editor-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background: white;
+}
+.pdf-editor-footer p {
+  font-size: 12px;
+  color: var(--muted);
+}
+.pdf-editor-footer button[aria-disabled="true"] {
+  opacity: 0.65;
+}
+.pdf-download {
+  flex-wrap: wrap;
+}
+@media (max-width: 850px) {
+  .modal.pdf-editor[open] {
+    display: block;
+  }
+  .modal.pdf-editor {
+    height: auto;
+    width: calc(100vw - 16px);
+    max-height: calc(100dvh - 16px);
+    overflow-y: auto;
+  }
+  .pdf-editor > header {
+    padding: 16px;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 2;
+  }
+  .pdf-editor-intro {
+    padding: 12px 16px;
+  }
+  .pdf-editor-grid {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+  .pdf-editor-controls {
+    overflow: visible;
+    padding: 16px;
+    border-right: 0;
+  }
+  .pdf-preview {
+    padding: 16px;
+    min-height: 600px;
+  }
+  .pdf-preview-document {
+    min-height: 440px;
+  }
+  .pdf-preview-document iframe {
+    height: 440px;
+  }
+  .pdf-editor-footer {
+    position: sticky;
+    bottom: 0;
+    padding: 12px 16px;
+    flex-direction: column;
+    align-items: stretch;
+    z-index: 2;
+  }
+  .pdf-editor-footer .button {
+    justify-content: center;
+  }
+}
+
+.pdf-preview-pages {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #dce2dd;
+}
+.pdf-preview-pages figure {
+  margin: 0;
+}
+.pdf-preview-pages img {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: white;
+  box-shadow: 0 2px 8px #20332b18;
+}
+.pdf-preview-pages figcaption {
+  padding: 8px;
+  color: #63736b;
+  font-size: 12px;
+  text-align: center;
+}
+@media (max-width: 850px) {
+  .pdf-preview-document {
+    height: 480px;
+    max-height: 480px;
+    min-height: 0;
+    flex: auto;
+  }
+}
+
+.pdf-preview-toolbar,
+.pdf-preview > .help,
+.pdf-preview > a {
+  flex-shrink: 0;
+}
+
+/* Persistent report settings page. One A4 sheet fits entirely in the preview. */
+.pdf-settings-editor {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: white;
+  overflow: hidden;
+}
+.pdf-settings-editor .pdf-editor-grid {
+  height: clamp(620px, 75dvh, 900px);
+}
+.pdf-settings-editor .pdf-preview-document {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 12px;
+  background: #dce2dd;
+}
+.pdf-preview-sheet {
+  margin: 0;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 210 / 297;
+}
+.pdf-preview-sheet img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px #20332b20);
+}
+.pdf-page-navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+  font-size: 13px;
+}
+.pdf-settings-editor > .error {
+  margin: 12px 24px;
+}
+.pdf-settings-editor .pdf-editor-footer {
+  flex-wrap: wrap;
+}
+.pdf-settings-editor .pdf-editor-footer > p {
+  flex: 1;
+  min-width: 150px;
+}
+@media (max-width: 1100px) and (min-width: 851px) {
+  .pdf-settings-editor .pdf-editor-grid {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+}
+@media (max-width: 850px) {
+  .pdf-settings-editor .pdf-editor-grid {
+    height: auto;
+  }
+  .pdf-settings-editor .pdf-preview {
+    min-height: 560px;
+  }
+  .pdf-settings-editor .pdf-preview-document {
+    height: 420px;
+    flex: none;
+  }
+  .pdf-settings-editor .pdf-editor-footer {
+    position: static;
+  }
+}
+
+/* The PDF workspace uses the available screen instead of a centered content card. */
+.workspace-pdf main {
+  max-width: none;
+  padding: 20px 24px;
+}
+.workspace-pdf .page-title {
+  margin-bottom: 16px;
+}
+.workspace-pdf .pdf-editor-intro {
+  padding: 10px 20px;
+  font-size: 13px;
+}
+.workspace-pdf .pdf-editor-controls {
+  padding: 24px;
+  gap: 24px;
+  scrollbar-gutter: stable;
+}
+.workspace-pdf .pdf-control-section legend {
+  font-size: 18px;
+}
+.workspace-pdf .pdf-style {
+  padding: 16px;
+}
+.workspace-pdf .pdf-style.selected {
+  padding: 15px;
+}
+.workspace-pdf .pdf-style strong {
+  font-size: 17px;
+}
+.workspace-pdf .pdf-style small,
+.workspace-pdf .pdf-control-section .help {
+  font-size: 14px;
+}
+.workspace-pdf .pdf-swatches {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.workspace-pdf .pdf-swatches button {
+  font-size: 14px;
+  min-height: 48px;
+}
+.workspace-pdf .pdf-preview {
+  padding: 16px 20px;
+}
+.workspace-pdf .pdf-preview-toolbar {
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.workspace-pdf .pdf-preview-toolbar strong {
+  font-size: 18px;
+}
+.workspace-pdf .pdf-preview-toolbar a {
+  font-size: 12px;
+}
+.workspace-pdf .pdf-preview-document {
+  padding: 8px;
+}
+@media (min-width: 1101px) {
+  .workspace-pdf .topbar {
+    height: 64px;
+    padding: 0 24px;
+  }
+  .workspace-pdf main {
+    height: calc(100dvh - 64px);
+    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+    padding: 16px 24px;
+  }
+  .workspace-pdf .page-title {
+    flex-shrink: 0;
+  }
+  .workspace-pdf .page-title .eyebrow {
+    display: none;
+  }
+  .workspace-pdf .page-title h1 {
+    font-size: 30px;
+  }
+  .workspace-pdf .page-title .description {
+    margin-top: 4px;
+  }
+  .workspace-pdf .pdf-settings-editor {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .workspace-pdf .pdf-editor-grid {
+    height: auto;
+    grid-template-columns: clamp(420px, 35%, 600px) minmax(0, 1fr);
+  }
+  .workspace-pdf .workspace-footer {
+    display: none;
+  }
+}
+@media (max-width: 1100px) {
+  .workspace-pdf main {
+    padding: 24px 16px;
+  }
+  .workspace-pdf .pdf-editor-grid {
+    height: auto;
+    grid-template-columns: minmax(0, 1fr);
+    overflow: visible;
+  }
+  .workspace-pdf .pdf-editor-controls {
+    overflow: visible;
+    border-right: 0;
+  }
+  .workspace-pdf .pdf-preview {
+    min-height: 0;
+  }
+  .workspace-pdf .pdf-preview-document {
+    height: clamp(420px, 70dvh, 760px);
+    max-height: none;
+    flex: none;
+  }
+  .workspace-pdf .pdf-editor-footer {
+    position: static;
+  }
+}
+@media (max-width: 600px) {
+  .workspace-pdf .pdf-editor-controls {
+    padding: 20px 16px;
+  }
+  .workspace-pdf .pdf-style {
+    padding: 12px;
+  }
+  .workspace-pdf .pdf-style.selected {
+    padding: 11px;
+  }
+  .workspace-pdf .pdf-style small {
+    font-size: 13px;
+  }
+  .workspace-pdf .pdf-swatches {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .workspace-pdf .pdf-preview {
+    padding: 16px 12px;
   }
 }

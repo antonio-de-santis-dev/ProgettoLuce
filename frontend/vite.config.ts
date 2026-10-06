@@ -8,6 +8,13 @@ export default defineConfig({
       "/actuator": "http://127.0.0.1:8080",
     },
   },
+  preview: {
+    proxy: { "/api": process.env.LUCE_API_TARGET ?? "http://127.0.0.1:8080" },
+    headers: {
+      "Content-Security-Policy":
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'",
+    },
+  },
   test: {
     environment: "jsdom",
     setupFiles: "./src/test/setup.ts",

@@ -78,6 +78,98 @@ class ConfrontoPdfRendererTest {
     }
   }
 
+  @Test
+  void quattroStiliConLogoEContattiMantengonoImportiEDettaglio() throws Exception {
+    var image =
+        new java.awt.image.BufferedImage(240, 80, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+    var graphics = image.createGraphics();
+    graphics.setColor(java.awt.Color.BLUE);
+    graphics.fillRect(0, 0, 240, 80);
+    graphics.dispose();
+    var encoded = new java.io.ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(image, "png", encoded);
+    String logo =
+        "data:image/png;base64," + Base64.getEncoder().encodeToString(encoded.toByteArray());
+    for (var stile : PdfPersonalizzazione.Stile.values()) {
+      var options =
+          new PdfPersonalizzazione(
+              stile,
+              "#D97706",
+              logo,
+              new PdfPersonalizzazione.Consulente(
+                  "Studio Energia",
+                  "Consulente energetico",
+                  "consulente@example.com",
+                  "+39 000 000 0000",
+                  "Via Esempio 12",
+                  true));
+      var bytes =
+          new ConfrontoPdfRenderer()
+              .genera(esempio("Mario Rossi", 10, "Nota di prova", false), options);
+      try (var pdf = Loader.loadPDF(bytes)) {
+        String text = new PDFTextStripper().getText(pdf);
+        assertThat(text)
+            .contains(
+                "Studio Energia",
+                "DATI DIMOSTRATIVI",
+                "77,00 €",
+                "123,00 €",
+                "600",
+                "Energia:",
+                "Via Esempio 12",
+                "Componente azzerata 9");
+        boolean hasImage = false;
+        for (var name : pdf.getPage(0).getResources().getXObjectNames())
+          hasImage |=
+              pdf.getPage(0).getResources().getXObject(name)
+                  instanceof org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+        assertThat(hasImage).isTrue();
+        if (stile == PdfPersonalizzazione.Stile.SINTESI)
+          assertThat(text.indexOf("Quanto puoi risparmiare"))
+              .isLessThan(text.indexOf("Cliente e proposta"));
+      }
+      Files.createDirectories(Path.of("target/pdf-verifica"));
+      Files.write(Path.of("target/pdf-verifica/editor-" + stile + ".pdf"), bytes);
+    }
+  }
+
+  @Test
+  void anteprimaRenderizzaOgniPaginaDelPdfScaricabile() throws Exception {
+    byte[] bytes = new ConfrontoPdfRenderer().genera(esempio("Cliente anteprima", 10, "", false));
+    var preview = PdfAnteprima.da(bytes);
+    assertThat(Base64.getDecoder().decode(preview.pdfBase64())).isEqualTo(bytes);
+    try (var pdf = Loader.loadPDF(bytes)) {
+      assertThat(preview.pagine()).hasSize(pdf.getNumberOfPages());
+    }
+    for (String page : preview.pagine()) {
+      assertThat(page).startsWith("data:image/png;base64,");
+      byte[] png = Base64.getDecoder().decode(page.substring(page.indexOf(',') + 1));
+      var image = javax.imageio.ImageIO.read(new java.io.ByteArrayInputStream(png));
+      assertThat(image.getWidth()).isGreaterThan(800);
+      assertThat(image.getHeight()).isGreaterThan(1200);
+    }
+  }
+
+  @Test
+  void rifiutaLoghiCorrottiFormatiNonAmmessiEDimensioniEccessive() throws Exception {
+    for (String data :
+        List.of(
+            "https://example.com/logo.png",
+            "data:image/svg+xml;base64,PHN2Zz4=",
+            "data:image/png;base64,bm9uLXVuaW1tYWdpbmU="))
+      assertThatThrownBy(() -> PdfLogo.leggi(data)).isInstanceOf(IllegalArgumentException.class);
+    var large =
+        new java.awt.image.BufferedImage(4097, 1, java.awt.image.BufferedImage.TYPE_INT_RGB);
+    var encoded = new java.io.ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(large, "png", encoded);
+    assertThatThrownBy(
+            () ->
+                PdfLogo.leggi(
+                    "data:image/png;base64,"
+                        + Base64.getEncoder().encodeToString(encoded.toByteArray())))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
   private ConfrontoService.Risposta esempio(
       String cliente, int count, String note, boolean perdita) {
     var z = BigDecimal.ZERO;

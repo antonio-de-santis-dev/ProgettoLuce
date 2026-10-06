@@ -93,11 +93,15 @@ Il database deve esistere ed essere accessibile. Flyway crea le tabelle con `V1_
 
 ## Scaricare il risultato in PDF
 
-Dopo **Calcola confronto**, premi **Scarica PDF**. Lo stesso pulsante è disponibile nello **Storico**, dopo aver aperto un confronto.
+Nel menu apri **Impostazioni PDF**: scegli uno dei quattro stili (Classico, Essenziale, Editoriale, Sintesi cliente), il colore, il logo PNG/JPEG e i recapiti del consulente. Premi **Salva impostazioni PDF**: la configurazione è salvata nel database e applicata automaticamente a ogni download, anche dallo storico e da altri browser. Le modifiche non salvate sono una bozza.
+
+L’anteprima a destra usa un documento dimostrativo, disponibile anche senza confronti. Mostra **un foglio A4 intero alla volta**, con frecce precedente/successiva. Su mobile l’anteprima è sotto i controlli.
+
+Dopo **Calcola confronto**, premi **Scarica PDF**. Lo stesso pulsante è disponibile nello **Storico**, dopo aver aperto un confronto. Non occorre scegliere nuovamente lo stile. La migration Flyway V2 crea automaticamente la tabella delle impostazioni all’avvio: conserva il volume PostgreSQL esistente.
 
 Il documento A4 contiene cliente/POD, offerta, periodo, importi e risparmio, proiezione annuale indicativa, dettaglio delle righe, consumi/PUN e parametri utilizzati. Include font incorporati, intestazione e numeri di pagina. Usa i dati salvati del confronto: modifica o cancellazione delle condizioni originali non cambiano il documento. Le cifre vengono formattate per la stampa, senza ripetere il calcolo.
 
-Endpoint: `GET /api/confronti/{id}/pdf`, risposta `application/pdf` e nome `confronto-{id}.pdf`. I font DejaVu e la loro licenza sono inclusi nel backend; non servono browser o programmi PDF installati sul server.
+Endpoint: `GET /api/confronti/{id}/pdf` per il report con le impostazioni salvate e `POST /api/confronti/{id}/pdf` con opzioni grafiche per il report personalizzato, risposta `application/pdf` e nome `confronto-{id}.pdf`. I font DejaVu e la loro licenza sono inclusi nel backend; non servono browser o programmi PDF installati sul server.
 
 ## Regole e limiti del modello iniziale
 
@@ -138,6 +142,7 @@ Dopo `mvn package` nel backend:
 
 ```bash
 cd frontend
+npm run build
 npx playwright install --with-deps chromium
 npm run test:e2e
 ```
@@ -149,5 +154,6 @@ Playwright avvia backend e frontend di test su porte 8081 e 5174, con database i
 - [Architettura e contratto API](docs/ARCHITETTURA.md)
 - [Report della prima versione](docs/REPORT_FASE_1.md)
 - [PDF del risultato: implementazione e verifiche](docs/REPORT_PDF.md)
+- [Editor PDF: stili, personalizzazione e verifiche](docs/REPORT_EDITOR_PDF.md)
 
 Upload/OCR, confronto multi-offerta, dashboard KPI, autenticazione e ruoli sono fasi successive. La generazione del PDF del risultato è disponibile; il caricamento e la lettura automatica di bollette PDF non sono ancora implementati.
