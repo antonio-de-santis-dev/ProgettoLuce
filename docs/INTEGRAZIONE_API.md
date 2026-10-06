@@ -15,10 +15,12 @@ git fetch origin
 git switch integrazioneAPI
 git pull --ff-only origin integrazioneAPI
 # Conserva il tuo .env e la password PostgreSQL già configurata.
-docker compose up -d --build
+FRONTEND_PORT=8089 docker compose -p progettoluce-api up -d --build
 ```
 
-Apri `http://localhost:8088/fonti` (oppure la tua `FRONTEND_PORT`). Flyway aggiunge le tabelle senza cancellare bollette, offerte, confronti o impostazioni PDF. Non usare `docker compose down --volumes` sul database di lavoro.
+Apri `http://localhost:8089/fonti`. Il nome di progetto `progettoluce-api` crea un volume PostgreSQL separato per provare il ramo; la versione main può restare in esecuzione sulla porta 8088. Inserisci i dati di test in questo ambiente.
+
+Flyway aggiunge la migrazione V3. Se scegli invece di usare il database principale, le tabelle esistenti non vengono cancellate, ma il vecchio codice main non può riaprire quel database aggiornato senza una procedura di ripristino: usa l’ambiente separato durante la prova. Non usare `docker compose down --volumes` sul database di lavoro.
 
 ## Cosa si aggiorna automaticamente
 
@@ -81,7 +83,7 @@ GME_PASSWORD=la-tua-password-api
 4. Ricrea il backend conservando PostgreSQL e il volume:
 
 ```bash
-docker compose up -d --build backend frontend
+FRONTEND_PORT=8089 docker compose -p progettoluce-api up -d --build backend frontend
 ```
 
 5. In **Fonti ufficiali**, verifica “GME: credenziali configurate”, seleziona un mese concluso e premi **Aggiorna adesso**. Controlla l’esito GME e la presenza delle cinque fasce nella scheda **Indici PUN**.
