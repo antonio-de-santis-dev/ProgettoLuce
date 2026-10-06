@@ -35,7 +35,11 @@ Riquadro consulente con nome/studio, ruolo, email, telefono e indirizzo. Dati in
 - Package Java e build TypeScript/Vite completati.
 - Quattro PDF con logo e dati consulente renderizzati; controllo del testo nei limiti delle pagine. Il report personalizzato di esempio si sviluppa su tre pagine.
 - Playwright eseguito sulla build di produzione, con la stessa CSP di Nginx e controllo degli errori CSP. Flusso esteso con selezione stile/colore, dati consulente, caricamento logo, anteprima, download personalizzato, screenshot desktop/mobile e download storico.
-- Verifica Compose estesa al POST personalizzato tramite Nginx e all’anteprima raster. Esito CI da aggiornare alla conclusione dei job.
+- Verifica Compose estesa al POST personalizzato tramite Nginx e all’anteprima raster. La [CI della versione verificata](https://github.com/antonio-de-santis-dev/ProgettoLuce/actions/runs/37447150009) è terminata con successo il 6 ottobre 2026: backend H2/PostgreSQL, frontend e Docker Compose.
+
+Gli screenshot finali desktop e mobile sono stati controllati visivamente. L’anteprima mostra le pagine effettive; il download rimane visibile anche nel viewport desktop 1280 × 600. Il PDF scaricato dal browser ha tre pagine, logo e dati personalizzati, importi 77,00 € / 123,00 € / 1.476,00 € verificati e nessun testo fuori dalla pagina. Download storico e persistenza dopo la ricreazione dei container verificati.
+
+Implementazione completata sul branch `feat/editor-pdf`, PR #3, basata sulla PR #2.
 
 ## Limiti
 
