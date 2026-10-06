@@ -93,11 +93,11 @@ Il database deve esistere ed essere accessibile. Flyway crea le tabelle con `V1_
 
 ## Scaricare il risultato in PDF
 
-Dopo **Calcola confronto**, premi **Scarica PDF**. Lo stesso pulsante è disponibile nello **Storico**, dopo aver aperto un confronto.
+Dopo **Calcola confronto**, premi **Scarica PDF**. Con **Personalizza PDF** apri l’editor: quattro stili (Classico, Essenziale, Editoriale, Sintesi cliente), sette colori consigliati, tavolozza e codice HEX, logo PNG/JPEG e riquadro del consulente con dati dimostrativi modificabili. L’anteprima a destra mostra il PDF effettivo e il download dall’editor usa lo stesso documento. Su mobile l’anteprima si trova sotto i controlli. Le preferenze sono memorizzate nel browser e riutilizzate nei download successivi. Lo stesso pulsante è disponibile nello **Storico**, dopo aver aperto un confronto.
 
 Il documento A4 contiene cliente/POD, offerta, periodo, importi e risparmio, proiezione annuale indicativa, dettaglio delle righe, consumi/PUN e parametri utilizzati. Include font incorporati, intestazione e numeri di pagina. Usa i dati salvati del confronto: modifica o cancellazione delle condizioni originali non cambiano il documento. Le cifre vengono formattate per la stampa, senza ripetere il calcolo.
 
-Endpoint: `GET /api/confronti/{id}/pdf`, risposta `application/pdf` e nome `confronto-{id}.pdf`. I font DejaVu e la loro licenza sono inclusi nel backend; non servono browser o programmi PDF installati sul server.
+Endpoint: `GET /api/confronti/{id}/pdf` per il report predefinito e `POST /api/confronti/{id}/pdf` con opzioni grafiche per il report personalizzato, risposta `application/pdf` e nome `confronto-{id}.pdf`. I font DejaVu e la loro licenza sono inclusi nel backend; non servono browser o programmi PDF installati sul server.
 
 ## Regole e limiti del modello iniziale
 
@@ -149,5 +149,6 @@ Playwright avvia backend e frontend di test su porte 8081 e 5174, con database i
 - [Architettura e contratto API](docs/ARCHITETTURA.md)
 - [Report della prima versione](docs/REPORT_FASE_1.md)
 - [PDF del risultato: implementazione e verifiche](docs/REPORT_PDF.md)
+- [Editor PDF: stili, personalizzazione e verifiche](docs/REPORT_EDITOR_PDF.md)
 
 Upload/OCR, confronto multi-offerta, dashboard KPI, autenticazione e ruoli sono fasi successive. La generazione del PDF del risultato è disponibile; il caricamento e la lettura automatica di bollette PDF non sono ancora implementati.

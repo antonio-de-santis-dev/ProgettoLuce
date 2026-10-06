@@ -105,6 +105,10 @@ La risposta è un allegato `application/pdf`, con nome stabile `confronto-{id}.p
 
 Il report contiene cliente/POD, condizioni, riepilogo economico, tutte le righe a precisione originale, consumi/PUN, parametri e limiti. Totali visualizzati a centesimi, dati di dettaglio senza arrotondamenti aggiuntivi. Font non universale: i caratteri senza glifo vengono rappresentati da `?` e la sostituzione è segnalata nel documento; l'originale resta nello snapshot.
 
+L’editor `PdfEditor` usa `POST /api/confronti/{id}/pdf` con `PdfPersonalizzazione`: stile, colore HEX, logo PNG/JPEG in data URI e dati del consulente. La validazione include lunghezze dei testi, dimensioni del file e dell’immagine; le dimensioni sono controllate prima della decodifica raster. Il colore secondario è derivato dal principale, con contrasto adattivo del testo. Non si accettano URL o SVG per il logo.
+
+L’anteprima è il PDF effettivo in un iframe blob. Le richieste sono ritardate di 400 ms e annullate quando arrivano nuove impostazioni; le risposte obsolete vengono ignorate. Il download usa il blob aggiornato già visualizzato. Preferenze e logo risiedono in localStorage, senza nuovi dati sul server. Nginx permette i frame blob e un corpo API fino a 2 MB; l’app rimane protetta dall’incorporamento esterno.
+
 ## Persistenza e rilascio
 
 Schema iniziale V1, vincoli e indici inclusi. Futuri cambiamenti richiederanno V2 e successive senza modificare V1 già applicata.

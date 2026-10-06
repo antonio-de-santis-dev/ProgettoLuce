@@ -75,6 +75,50 @@ test("una consulenza completa: parametri, offerta, bolletta, confronto e storico
     fullPage: true,
     animations: "disabled",
   });
+  await page.getByRole("button", { name: "Personalizza PDF" }).click();
+  await expect(page.getByText("PDF aggiornato · formato A4")).toBeVisible();
+  await page.getByRole("radio", { name: /Sintesi cliente/ }).check();
+  await page.getByRole("button", { name: "Blu Istituzionale" }).click();
+  await page.getByLabel("Nome o studio").fill("Studio Browser PDF");
+  await page
+    .getByLabel("Carica il tuo logo")
+    .setInputFiles({
+      name: "logo.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAPAAAABQCAYAAAAnSfh8AAABCklEQVR4nO3TQQ3AIADAwDEhCEEippmHfUiTOwX9dMy1zwMkvbcDgP8MDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCDMwhBkYwgwMYQaGMANDmIEhzMAQZmAIMzCEGRjCDAxhBoYwA0OYgSHMwBBmYAgzMIQZGMIMDGEGhjADQ5iBIczAEGZgCPsAaBECgTfwPnMAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    });
+  await expect(page.getByAltText("Logo scelto per il report")).toBeVisible();
+  await expect(page.getByText("PDF aggiornato · formato A4")).toBeVisible();
+  await expect(page.getByTitle("PDF personalizzato")).toHaveAttribute(
+    "src",
+    /^blob:/,
+  );
+  await page.screenshot({
+    path: "test-results/editor-pdf-desktop.png",
+    animations: "disabled",
+  });
+  const customDownloadPromise = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Scarica PDF personalizzato" })
+    .click();
+  const customDownload = await customDownloadPromise;
+  await customDownload.saveAs("test-results/confronto-personalizzato.pdf");
+  expect(await customDownload.failure()).toBeNull();
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page
+      .locator(".pdf-editor")
+      .evaluate((e) => e.scrollWidth <= e.clientWidth + 1),
+  ).toBeTruthy();
+  await page.screenshot({
+    path: "test-results/editor-pdf-mobile.png",
+    animations: "disabled",
+  });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
   await expect
     .poll(() =>

@@ -1,5 +1,6 @@
 package it.progettoluce.confronti;
 
+import jakarta.validation.Valid;
 import java.io.IOException;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +16,19 @@ public class ConfrontoPdfController {
     this.renderer = renderer;
   }
 
+  @PostMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
+  public ResponseEntity<byte[]> personalizza(
+      @PathVariable Long id, @Valid @RequestBody PdfPersonalizzazione opzioni) throws IOException {
+    return risposta(id, renderer.genera(confronti.leggi(id), opzioni));
+  }
+
   @GetMapping(value = "/{id}/pdf", produces = MediaType.APPLICATION_PDF_VALUE)
   public ResponseEntity<byte[]> scarica(@PathVariable Long id) throws IOException {
     byte[] pdf = renderer.genera(confronti.leggi(id));
+    return risposta(id, pdf);
+  }
+
+  private ResponseEntity<byte[]> risposta(Long id, byte[] pdf) {
     return ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_PDF)
         .header(

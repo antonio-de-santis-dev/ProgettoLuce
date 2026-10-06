@@ -11,24 +11,40 @@ import java.util.*;
 import org.apache.pdfbox.pdmodel.*;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.*;
+import org.apache.pdfbox.pdmodel.graphics.image.*;
 import org.springframework.stereotype.Component;
 
 /** Renders the saved snapshot, without recalculating or reading live commercial conditions. */
 @Component
 public class ConfrontoPdfRenderer {
   public byte[] genera(ConfrontoService.Risposta confronto) throws IOException {
+    return genera(confronto, PdfPersonalizzazione.predefinita());
+  }
+
+  public byte[] genera(ConfrontoService.Risposta confronto, PdfPersonalizzazione opzioni)
+      throws IOException {
+    var logo = PdfLogo.leggi(opzioni.logo());
     try (PDDocument document = new PDDocument();
         ByteArrayOutputStream output = new ByteArrayOutputStream()) {
       var info = document.getDocumentInformation();
       info.setTitle("ProgettoLuce - Confronto #" + confronto.id());
       info.setAuthor("ProgettoLuce");
       info.setSubject("Simulazione parametrica dei costi dell'energia elettrica");
-      try (Layout l = new Layout(document, confronto.id())) {
+      try (Layout l = new Layout(document, confronto.id(), opzioni, logo)) {
         var s = confronto.dati();
         var b = s.bolletta();
         var o = s.offerta();
         var p = s.parametri();
         var r = s.risultato();
+        l.consulente();
+        if (opzioni.stileEffettivo() == PdfPersonalizzazione.Stile.SINTESI) {
+          l.section("Quanto puoi risparmiare");
+          l.metrics(b.totaleFatturato(), r.totale(), r.risparmioPeriodo());
+          l.paragraph(
+              "Confrontiamo gli stessi consumi: il costo proposto include l'IVA. Il risparmio è la"
+                  + " differenza rispetto alla bolletta attuale.",
+              false);
+        }
         l.section("Cliente e proposta");
         l.field("Cliente", b.cliente());
         l.field("POD / fornitore attuale", b.pod() + " / " + b.fornitore());
@@ -65,7 +81,8 @@ public class ConfrontoPdfRenderer {
                     .format(confronto.creatoIl())
                 + " · Motore "
                 + s.versioneMotore());
-        l.metrics(b.totaleFatturato(), r.totale(), r.risparmioPeriodo());
+        if (opzioni.stileEffettivo() != PdfPersonalizzazione.Stile.SINTESI)
+          l.metrics(b.totaleFatturato(), r.totale(), r.risparmioPeriodo());
         l.row(
             "Variazione sul costo attuale",
             r.risparmioPercentuale() == null
@@ -73,14 +90,6 @@ public class ConfrontoPdfRenderer {
                 : number(r.risparmioPercentuale().abs())
                     + "% "
                     + (r.risparmioPeriodo().signum() >= 0 ? "in meno" : "in più"));
-        l.section("Composizione del costo proposto");
-        for (var entry : r.categorie().entrySet())
-          l.row(category(entry.getKey()), money(entry.getValue()));
-        l.row("Imponibile arrotondato", money(r.imponibile()));
-        l.row(
-            "IVA " + number(b.aliquotaIva().multiply(new BigDecimal("100"))) + "%", money(r.iva()));
-        l.row("Altre partite esenti IVA", money(r.altrePartiteEsenti()));
-        l.row("Totale offerta proposta (IVA inclusa)", money(r.totale()));
         l.section("Proiezione annuale indicativa");
         l.paragraph(
             (r.stimaRisparmioAnnuale().signum() >= 0
@@ -93,6 +102,19 @@ public class ConfrontoPdfRenderer {
             "Le categorie sono visualizzate a centesimi; il motore somma le righe precise e"
                 + " arrotonda l'imponibile una sola volta.",
             false);
+        l.ensure((r.categorie().size() + 4) * 20 + 100);
+        l.section("Come si forma il costo");
+        l.paragraph(
+            "Energia: consumi e costo commerciale (PCV). Trasporto: rete e contatore. Oneri: costi"
+                + " del sistema elettrico. Imposte: accisa e IVA.",
+            false);
+        for (var entry : r.categorie().entrySet())
+          l.row(category(entry.getKey()), money(entry.getValue()));
+        l.row("Imponibile arrotondato", money(r.imponibile()));
+        l.row(
+            "IVA " + number(b.aliquotaIva().multiply(new BigDecimal("100"))) + "%", money(r.iva()));
+        l.row("Altre partite esenti IVA", money(r.altrePartiteEsenti()));
+        l.row("Totale offerta proposta (IVA inclusa)", money(r.totale()));
         l.section("Dettaglio del calcolo · " + r.righe().size() + " righe");
         String[] headings = {"Mese", "Voce", "Quantità", "Corrispettivo", "Importo"};
         l.tableHeader(headings);
@@ -130,6 +152,7 @@ public class ConfrontoPdfRenderer {
             if (!values.isEmpty()) l.paragraph("PUN: " + String.join(" · ", values), false);
           }
         }
+        l.ensure(225);
         l.section("Parametri utilizzati");
         l.field("Profilo / fonte", p.nomeProfilo() + " / " + p.fonte());
         l.row(
@@ -193,10 +216,10 @@ public class ConfrontoPdfRenderer {
   private static final class Layout implements AutoCloseable {
     private static final float LEFT = 42, WIDTH = PDRectangle.A4.getWidth() - 84;
     private static final float[] COLUMNS = {55, 163, 83, 105, WIDTH - 406};
-    private static final Color GREEN = new Color(25, 77, 61),
-        INK = new Color(32, 51, 43),
-        MUTED = new Color(99, 115, 107),
-        PALE = new Color(240, 244, 235);
+    private static final Color INK = new Color(32, 51, 43), MUTED = new Color(99, 115, 107);
+    private final Color GREEN, PALE, ACCENT_INK, ON_PRIMARY;
+    private final PdfPersonalizzazione options;
+    private final PDImageXObject logo;
     private final PDDocument document;
     private final PDType0Font regular, bold;
     private final Long id;
@@ -204,12 +227,66 @@ public class ConfrontoPdfRenderer {
     private float y;
     private boolean substitutions;
 
-    Layout(PDDocument document, Long id) throws IOException {
+    Layout(
+        PDDocument document,
+        Long id,
+        PdfPersonalizzazione options,
+        java.awt.image.BufferedImage image)
+        throws IOException {
+      this.options = options;
+      GREEN = Color.decode(options.coloreEffettivo());
+      PALE = mix(GREEN, .91);
+      ACCENT_INK = luminance(GREEN) < .183 ? GREEN : INK;
+      ON_PRIMARY = luminance(GREEN) < .179 ? Color.WHITE : Color.BLACK;
+      logo = image == null ? null : LosslessFactory.createFromImage(document, image);
       this.document = document;
       this.id = id;
       regular = font(document, "DejaVuSans.ttf");
       bold = font(document, "DejaVuSans-Bold.ttf");
       newPage();
+    }
+
+    private static Color mix(Color color, double white) {
+      return new Color(
+          (int) (color.getRed() * (1 - white) + 255 * white),
+          (int) (color.getGreen() * (1 - white) + 255 * white),
+          (int) (color.getBlue() * (1 - white) + 255 * white));
+    }
+
+    private static double luminance(Color color) {
+      double[] channels = {color.getRed() / 255d, color.getGreen() / 255d, color.getBlue() / 255d};
+      for (int i = 0; i < 3; i++)
+        channels[i] =
+            channels[i] <= .04045
+                ? channels[i] / 12.92
+                : Math.pow((channels[i] + .055) / 1.055, 2.4);
+      return channels[0] * .2126 + channels[1] * .7152 + channels[2] * .0722;
+    }
+
+    void consulente() throws IOException {
+      var c = options.consulente();
+      if (c == null) return;
+      var lines = new ArrayList<String>();
+      for (String value :
+          new String[] {c.nome(), c.ruolo(), c.email(), c.telefono(), c.indirizzo()})
+        if (value != null && !value.isBlank()) lines.addAll(wrap(value, regular, 9, WIDTH - 24));
+      if (lines.isEmpty()) return;
+      float height = 29 + lines.size() * 12;
+      ensure(height + 12);
+      box(LEFT, y - height + 12, WIDTH, height, PALE);
+      text(
+          c.dimostrativo() ? "CONSULENTE · DATI DIMOSTRATIVI" : "IL TUO CONSULENTE",
+          LEFT + 12,
+          y - 4,
+          bold,
+          8,
+          ACCENT_INK);
+      float baseline = y - 19;
+      for (String line : lines) {
+        text(line, LEFT + 12, baseline, regular, 9, INK);
+        baseline -= 12;
+      }
+      y -= height + 12;
     }
 
     private static PDType0Font font(PDDocument document, String name) throws IOException {
@@ -224,10 +301,36 @@ public class ConfrontoPdfRenderer {
       var page = new PDPage(PDRectangle.A4);
       document.addPage(page);
       stream = new PDPageContentStream(document, page);
-      box(0, 747, PDRectangle.A4.getWidth(), 95, GREEN);
-      text("progetto luce.", LEFT, 803, bold, 20, Color.WHITE);
-      text("CONFRONTO ENERGIA ELETTRICA", LEFT, 777, regular, 10, Color.WHITE);
-      text("REPORT #" + id, PDRectangle.A4.getWidth() - 145, 803, bold, 10, Color.WHITE);
+      var style = options.stileEffettivo();
+      boolean filled = style == PdfPersonalizzazione.Stile.CLASSICO;
+      if (filled) box(0, 747, PDRectangle.A4.getWidth(), 95, GREEN);
+      else if (style == PdfPersonalizzazione.Stile.ESSENZIALE) box(LEFT, 747, WIDTH, 2, GREEN);
+      else if (style == PdfPersonalizzazione.Stile.EDITORIALE) {
+        box(0, 747, 12, 95, GREEN);
+        box(LEFT, 750, WIDTH, 1, PALE);
+      } else {
+        box(0, 747, PDRectangle.A4.getWidth(), 95, PALE);
+        box(0, 747, PDRectangle.A4.getWidth(), 4, GREEN);
+      }
+      Color ink = filled ? ON_PRIMARY : ACCENT_INK;
+      float titleX = LEFT;
+      if (logo != null) {
+        box(LEFT, 771, 60, 52, Color.WHITE);
+        float scale = Math.min(52f / logo.getWidth(), 44f / logo.getHeight());
+        float w = logo.getWidth() * scale, h = logo.getHeight() * scale;
+        stream.drawImage(logo, LEFT + (60 - w) / 2, 775 + (44 - h) / 2, w, h);
+        titleX += 72;
+      }
+      text(
+          style == PdfPersonalizzazione.Stile.EDITORIALE
+              ? "La tua energia, in chiaro."
+              : "Confronto energia",
+          titleX,
+          803,
+          bold,
+          logo == null ? 20 : 16,
+          ink);
+      text("PROGETTO LUCE · REPORT #" + id, titleX, 777, regular, 9, ink);
       y = 721;
     }
 
@@ -238,7 +341,10 @@ public class ConfrontoPdfRenderer {
     void section(String value) throws IOException {
       ensure(90);
       y -= 8;
-      text(value, LEFT, y, bold, 13, GREEN);
+      if (options.stileEffettivo() == PdfPersonalizzazione.Stile.EDITORIALE) {
+        box(LEFT, y - 3, 4, 15, GREEN);
+        text(value, LEFT + 12, y, bold, 13, ACCENT_INK);
+      } else text(value, LEFT, y, bold, 13, ACCENT_INK);
       y -= 12;
       box(LEFT, y, WIDTH, 1, PALE);
       y -= 11;
@@ -284,6 +390,14 @@ public class ConfrontoPdfRenderer {
     }
 
     void metrics(BigDecimal current, BigDecimal proposed, BigDecimal saving) throws IOException {
+      if (options.stileEffettivo() == PdfPersonalizzazione.Stile.ESSENZIALE) {
+        row("Bolletta attuale (IVA inclusa)", money(current));
+        row("Offerta proposta (IVA inclusa)", money(proposed));
+        row(
+            saving.signum() >= 0 ? "Risparmio nel periodo" : "Maggior costo nel periodo",
+            money(saving.abs()));
+        return;
+      }
       ensure(90);
       String[] labels = {
         "Bolletta attuale",
@@ -295,10 +409,14 @@ public class ConfrontoPdfRenderer {
       for (int i = 0; i < 3; i++) {
         float x = LEFT + i * (w + 10);
         box(x, y - 68, w, 72, PALE);
+        if (options.stileEffettivo() == PdfPersonalizzazione.Stile.EDITORIALE)
+          box(x, y - 68, 3, 72, GREEN);
+        if (options.stileEffettivo() == PdfPersonalizzazione.Stile.SINTESI && i == 2)
+          box(x, y - 68, w, 4, GREEN);
         text(labels[i], x + 10, y - 15, regular, 8, MUTED);
         float size = 18;
         while (bold.getStringWidth(values[i]) / 1000 * size > w - 20) size--;
-        text(values[i], x + 10, y - 44, bold, size, GREEN);
+        text(values[i], x + 10, y - 44, bold, size, ACCENT_INK);
       }
       y -= 87;
     }
@@ -308,7 +426,7 @@ public class ConfrontoPdfRenderer {
       box(LEFT, y - 21, WIDTH, 26, GREEN);
       float x = LEFT;
       for (int i = 0; i < headings.length; i++) {
-        text(headings[i], x + 5, y - 12, bold, 8, Color.WHITE);
+        text(headings[i], x + 5, y - 12, bold, 8, ON_PRIMARY);
         x += COLUMNS[i];
       }
       y -= 32;

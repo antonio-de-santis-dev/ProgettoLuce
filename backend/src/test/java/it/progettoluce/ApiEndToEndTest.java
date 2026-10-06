@@ -306,6 +306,36 @@ class ApiEndToEndTest {
       assertThat(new org.apache.pdfbox.text.PDFTextStripper().getText(pdf))
           .contains("77,00 €", "123,00 €", "Cliente test");
     }
+    byte[] custom =
+        mvc.perform(
+                post("/api/confronti/" + cid + "/pdf")
+                    .contentType("application/json")
+                    .content(
+                        "{\"stile\":\"SINTESI\",\"colore\":\"#1E3A8A\",\"consulente\":{\"nome\":\"Studio"
+                            + " Test\",\"dimostrativo\":true}}"))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType("application/pdf"))
+            .andExpect(header().string("Cache-Control", "no-store"))
+            .andReturn()
+            .getResponse()
+            .getContentAsByteArray();
+    try (var pdf = org.apache.pdfbox.Loader.loadPDF(custom)) {
+      assertThat(new org.apache.pdfbox.text.PDFTextStripper().getText(pdf))
+          .contains("Studio Test", "77,00 €", "123,00 €");
+    }
+    for (String invalid :
+        java.util.List.of(
+            "{\"colore\":\"rosso\"}",
+            "{\"stile\":\"IGNOTO\"}",
+            "{\"logo\":\"data:image/png;base64,invalid\"}",
+            "{\"consulente\":{\"nome\":\"" + "x".repeat(101) + "\"}}"))
+      mvc.perform(
+              post("/api/confronti/" + cid + "/pdf")
+                  .contentType("application/json")
+                  .content(invalid))
+          .andExpect(status().isBadRequest());
+    mvc.perform(post("/api/confronti/999999/pdf").contentType("application/json").content("{}"))
+        .andExpect(status().isNotFound());
     mvc.perform(get("/api/confronti/999999/pdf")).andExpect(status().isNotFound());
   }
 

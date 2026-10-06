@@ -34,6 +34,8 @@ def check_frontend():
             raise AssertionError(f"Header nosniff assente: {path}")
         if "frame-ancestors 'none'" not in headers.get("Content-Security-Policy", ""):
             raise AssertionError(f"CSP assente: {path}")
+        if "frame-src 'self' blob:" not in headers.get("Content-Security-Policy", ""):
+            raise AssertionError("CSP senza supporto per l'anteprima PDF locale")
         if path == "/storico" and content != html:
             raise AssertionError("Fallback SPA non funzionante")
         if path == "/" and "no-cache" not in headers.get("Cache-Control", ""):
@@ -68,9 +70,14 @@ def main():
             raise AssertionError("Download PDF non funzionante nello stack Docker")
         if response.headers.get("Cache-Control") != "no-store":
             raise AssertionError("Il PDF deve impedire la cache dei dati cliente")
+    custom = {"stile": "SINTESI", "colore": "#1E3A8A", "consulente": {"nome": "Studio Compose", "dimostrativo": True}}
+    request = Request(BASE + f"/api/confronti/{snapshot['id']}/pdf", data=json.dumps(custom).encode(), headers={"Content-Type": "application/json"})
+    with urlopen(request, timeout=20) as response:
+        if response.headers.get_content_type() != "application/pdf" or not response.read().startswith(b"%PDF-"):
+            raise AssertionError("Download PDF personalizzato non funzionante tramite Nginx")
     if Decimal(result["totale"]) != Decimal("77") or Decimal(result["risparmioPeriodo"]) != Decimal("123"):
         raise AssertionError("Risultato economico inatteso")
-    print(f"Compose {sys.argv[1]}: SPA, bundle, header, API, PDF e confronto #{snapshot['id']} verificati (77 / 123 euro).")
+    print(f"Compose {sys.argv[1]}: SPA, bundle, header, API, PDF standard/personalizzato e confronto #{snapshot['id']} verificati (77 / 123 euro).")
 
 
 if __name__ == "__main__":
