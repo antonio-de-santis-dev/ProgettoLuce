@@ -1,0 +1,29 @@
+DATI SINTETICI - SOLO PER TEST MANUALI
+
+1. PARAMETRI GESTORE
+Nome profilo: Profilo test manuale
+Fonte: Dati sintetici, gennaio 2026; non usare per consulenza reale
+Coefficiente perdite: 0
+Dispacciamento, trasporto fisso, trasporto potenza annuo, trasporto energia,
+oneri fissi, oneri energia e accisa: tutti 0
+
+2. OFFERTA
+Fornitore: Gestore Demo
+Nome: Luce Fissa Test
+Tipo: Prezzo fisso; tariffa: Monoraria
+Prezzo F0: 0,10 euro/kWh
+PCV annua: 120 euro; offerta attiva
+
+3. BOLLETTA CLIENTE
+Cliente: Mario Rossi Test; POD: POD-DEMO
+Fornitore: Fornitore Demo; potenza: 3 kW
+Totale attuale: 200 euro; IVA: 10%
+Altre partite imponibili ed esenti: 0
+Mese: gennaio 2026; F1: 100 kWh; F2: 200 kWh; F3: 300 kWh
+
+4. CONFRONTO
+Selezionare la bolletta e l'offerta; utilizzare i parametri manuali.
+Atteso: materia energia 70 euro, IVA 7 euro, totale proposto 77 euro.
+Risparmio periodo: 123 euro (61,5%); proiezione annua: 1476 euro.
+Provare quattro stili, colori, logo, salvataggio impostazioni PDF ed esportazione.
+Riavviare con Ferma/Avvia: verificare che i dati e le impostazioni restino presenti.
