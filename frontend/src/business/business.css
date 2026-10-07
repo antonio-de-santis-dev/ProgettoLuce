@@ -474,3 +474,16 @@
     break-before: page;
   }
 }
+
+.business-nav-close {
+  display: none;
+}
+@media (max-width: 900px) {
+  .business-nav-close {
+    display: inline-grid;
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    color: #dae5de;
+  }
+}

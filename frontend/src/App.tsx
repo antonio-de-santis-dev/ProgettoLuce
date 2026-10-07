@@ -32,7 +32,20 @@ export default function App() {
       <a href="#main-content" className="skip-link">
         Vai al contenuto
       </a>
-      <aside className={`sidebar ${open ? "open" : ""}`}>
+      <aside
+        id="business-navigation"
+        className={`sidebar ${open ? "open" : ""}`}
+      >
+        {open && (
+          <button
+            type="button"
+            className="icon-button business-nav-close"
+            aria-label="Chiudi menu"
+            onClick={() => setOpen(false)}
+          >
+            <X size={20} />
+          </button>
+        )}
         <Link className="brand" to="/">
           <span>
             <Building2 size={24} />
@@ -89,7 +102,8 @@ export default function App() {
             <button
               className="icon-button mobile-menu"
               aria-expanded={open}
-              aria-label={open ? "Chiudi menu" : "Apri menu"}
+              aria-label="Apri menu"
+              aria-controls="business-navigation"
               onClick={() => setOpen(!open)}
             >
               {open ? <X /> : <Menu />}

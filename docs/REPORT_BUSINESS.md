@@ -19,8 +19,9 @@ Database H2 business separato nell'avvio demo e Windows; PostgreSQL con Docker.
 - Frontend: 27 test, inclusi 5 nuovi test business; compilazione TypeScript/Vite.
 - Browser Chromium: profilo, simulazione, confronto, download PDF, storico,
   aggiornamento tariffario e conservazione del risultato, revisioni, assenza di
-  overflow orizzontale a 390 px.
-- PDF: estrazione del testo e controllo visivo della prima pagina del caso sintetico.
+  overflow orizzontale e apertura/chiusura del menu a 390 px.
+- PDF: estrazione del testo e controllo visivo delle tre pagine del caso sintetico.
+- JAR integrato: API, header, route SPA, calcolo, PDF e persistenza dopo riavvio.
 - Script Python: verifica della sintassi.
 
 Caso sintetico di due mesi: gennaio senza quote/consumi; febbraio 600 kWh,
@@ -29,6 +30,9 @@ Attesi: imponibile 76 €, IVA 16,72 €, totale 92,72 €, differenza 107,28 �
 alla fattura di 200 €, annualizzazione 643,68 €.
 
 ## Controlli su GitHub
+
+Prima esecuzione completata con successo sul commit `4f5b6ac`: backend H2/
+PostgreSQL, frontend/browser, Compose con riavvio e pacchetto Windows.
 
 I workflow verificano H2, PostgreSQL, stack Compose e riavvio persistente;
 quello Windows compila il pacchetto con Java incluso e prova launcher, PDF,

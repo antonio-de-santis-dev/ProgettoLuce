@@ -101,12 +101,29 @@ test("profilo business, simulazione, PDF, versioni e vista mobile", async ({
       () => document.documentElement.scrollWidth <= window.innerWidth + 1,
     ),
   ).toBeTruthy();
+  await expect
+    .poll(
+      async () =>
+        (await page.locator(".sidebar").boundingBox())!.x +
+        (await page.locator(".sidebar").boundingBox())!.width,
+    )
+    .toBeLessThanOrEqual(1);
+  await page.getByRole("button", { name: "Apri menu", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Chiudi menu", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Chiudi menu", exact: true }).click();
+  await expect(
+    page.getByRole("button", { name: "Apri menu", exact: true }),
+  ).toBeVisible();
   await page.screenshot({
+    animations: "disabled",
     path: "test-results/business-mobile.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.screenshot({
+    animations: "disabled",
     path: "test-results/business-desktop.png",
     fullPage: true,
   });
