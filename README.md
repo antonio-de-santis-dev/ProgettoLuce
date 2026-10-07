@@ -1,31 +1,29 @@
-# ProgettoLuce
+# ProgettoLuce Business
 
-Applicazione nuova per consulenti energetici: offerte, bollette clienti, parametri del gestore e confronto dei costi con dettaglio delle righe. Il progetto usa SimulatoreBolette esclusivamente come riferimento funzionale; il codice applicativo è stato scritto da zero.
+Simulatore locale della fornitura elettrica per imprese, sviluppato sul branch **simulatore-business** a partire da `windows-portabile` (`9060e1e`). Interfaccia e motore business separati dalla versione domestica; nessun merge su main.
 
-## Cosa funziona
+## Funzioni
 
-- Creazione, modifica, ricerca, attivazione e cancellazione offerte.
-- Prezzo fisso e indicizzato PUN, con tariffe monorarie, biorarie e triorarie.
-- Generazione delle voci energia e PCV nel backend, persistenza e aggiornamento senza orfani.
-- Bollette con consumi F1/F2/F3 per ogni mese, PUN esplicito per fascia e altre partite.
-- Configurazione dei parametri di trasporto, oneri, dispacciamento, perdite e accisa.
-- Confronto sullo stesso consumo, grafico dei costi, righe di calcolo e stima annuale indicativa.
-- Storico con snapshot immutabili di bolletta, offerta, parametri e risultato.
-- Download PDF del confronto, disponibile nel risultato e nello storico.
-- Controllo della versione sugli aggiornamenti e validazione degli input.
+- Ragione sociale, POD, partita IVA facoltativa, potenza, fattura precedente e 1–12 mesi consecutivi.
+- Consumi F1/F2/F3 e profilo tariffario distinto per mese.
+- Energia fissa o PUN + spread con indici espliciti in €/kWh.
+- Perdite configurabili, anche ROUND a kWh interi per fascia.
+- Trasporto/oneri per kWh, quote fisse e quote di potenza in €/kW/mese o €/kW/anno.
+- IVA per singola voce, riepilogo per aliquota, altre partite imponibili/esenti e accrediti.
+- Profili con decorrenza, scadenza, fonte, verifica interna e revisioni.
+- Modifica tariffe protetta da chiave amministratore; versione obsoleta = 409.
+- Risultato, categorie, incidenze, differenza e annualizzazione; storico paginato e PDF da snapshot.
 
-## Avvio rapido, senza installare PostgreSQL
+## Avvio locale senza Docker
 
-Prerequisiti: **Java 17, Maven 3.6.3+ e Node.js 24**.
-
-Primo terminale:
+Prerequisiti: **Java 17 JDK, Maven 3.6.3+ e Node.js 24**.
 
 ```bash
 cd backend
 mvn spring-boot:run -Dspring-boot.run.profiles=demo
 ```
 
-Secondo terminale:
+In un secondo terminale:
 
 ```bash
 cd frontend
@@ -33,137 +31,82 @@ npm ci
 npm run dev
 ```
 
-Apri **http://localhost:5173**. API su http://localhost:8080.
+Apri **http://localhost:5173**. Il backend demo ascolta soltanto su `127.0.0.1:8080`; il database H2 persistente usa `backend/data/luce-business`, distinto da quello domestico.
 
-Il profilo `demo` usa H2 su file in `backend/data`: i dati sopravvivono ai riavvii. È una modalità locale, non il database di produzione. Nessuna offerta o tariffa viene precaricata automaticamente.
+In **Offerte e tariffe**, premi **Sblocca tariffe**. Per la sola demo locale la chiave predefinita è `demo-business-local`. Per impostarne una personale, esporta `BUSINESS_ADMIN_TOKEN` prima di avviare il backend. Non inviare né committare la chiave. Nel frontend rimane in memoria soltanto per quella pagina/sessione e il server la verifica a ogni modifica.
 
-Puoi anche avviare entrambi con `bash avvia-demo.sh`. Lo script controlla i prerequisiti e ferma i processi avviati quando premi Ctrl+C.
+Lo script `bash avvia-demo.sh` può avviare entrambi i servizi se i prerequisiti sono disponibili.
 
-### Un esempio per provare il flusso
+## Docker e PostgreSQL
 
-Con il backend in esecuzione:
+```bash
+cp .env.example .env
+# Imposta DB_PASSWORD e BUSINESS_ADMIN_TOKEN, con valori diversi e non vuoti.
+docker compose -p luce-business up --build -d --wait
+```
+
+Apri **http://localhost:8088**. Il progetto `luce-business` usa un volume separato. Prima libera la porta se il programma domestico o il pacchetto Windows la stanno usando. Non sono richieste nuove porte per il simulatore.
+
+```bash
+docker compose -p luce-business logs -f backend
+docker compose -p luce-business down
+```
+
+Non aggiungere `--volumes` se vuoi conservare i dati. Per esporre l'applicazione come servizio pubblico occorrono utenti, autorizzazione sulle simulazioni e isolamento fra consulenti: la chiave protegge le tariffe, non costituisce un sistema multiutente.
+
+## Prima simulazione
+
+1. Crea un profilo in **Offerte e tariffe**, indicando prezzi, unità, fonti e decorrenza. Il modello è una bozza: corrispettivi zero, aliquota 22% e perdite 10% sono campi modificabili, non tariffe certificate.
+2. Verifica separatamente energia e perdite: lo stesso prezzo deve essere impostato su entrambe se così previsto dal contratto. Evita di aggiungere perdite già comprese in una voce.
+3. Imposta le quote business anche in potenza. Le quote annuali vengono divise per 12 dal motore.
+4. Nel **Simulatore**, inserisci dati dell'impresa, potenza, importo precedente e consumi; scegli un profilo valido per ciascun mese.
+5. Controlla quote fisse e fiscalità; conferma che la fattura precedente sia confrontabile. Premi **Calcola e salva simulazione**.
+6. Consulta risultato, IVA, dettaglio mensile e righe. Scarica il PDF o riapri il risultato nello **Storico**.
+
+Per un caso sintetico, con backend acceso:
 
 ```bash
 python3 scripts/carica-esempio.py
 ```
 
-Lo script crea dati **sintetici** riconoscibili. Se esiste già un profilo parametri, non lo sovrascrive. Scegli dal frontend la bolletta e l'offerta di esempio e premi **Calcola confronto**.
+Il caso crea gennaio con consumi/quote zero e febbraio con 600 kWh, perdite 10%, prezzo 0,10 €/kWh, PCV 120 €/anno e IVA 22%: imponibile **76 €**, totale **92,72 €**, differenza contro 200 € **107,28 €**, annualizzazione su due mesi **643,68 €**. I dati sono esclusivamente di test. Lo script crea nuovi record a ogni esecuzione. Con Docker indica `http://127.0.0.1:8088/api` ed esporta la chiave amministratore del tuo `.env`.
 
-Con il profilo sintetico a zero: 600 kWh × 0,10 €/kWh + 120 €/anno ÷ 12 = **70 € imponibili**, 10% IVA = **77 € totale**, contro 200 € fatturati = **123 € risparmio del mese**. Questi numeri sono un caso di test, non un'offerta di mercato.
+## Scelte rispetto alla specifica
 
-## Avvio con PostgreSQL e Docker Compose
+La specifica allegata descrive un Excel ma non contiene tutti i corrispettivi originali. Il motore non inventa quelle tariffe e non riproduce riferimenti come `F80129` o `K132`. Ogni aliquota è esplicita, comprese le differenze 10%/22%.
 
-Prerequisito: Docker con Compose v2.
+Gli aggregati descritti nel documento, **1.434,15 € imponibili + 315,51 € IVA**, producono **1.749,66 €**, non 1.757,98 €. Rimane una differenza di **8,32 €** da spiegare nel workbook originale. Il test usa quei subtotali come fixture aggregata, non come ricostruzione delle tariffe Excel. Con fattura precedente 1.811,79 €, quel caso riconciliato dà 62,13 € di differenza e 372,78 € annualizzati.
 
-```bash
-cp .env.example .env
-# Modifica DB_PASSWORD nel file .env
-docker compose up --build -d --wait
-```
+“Verificato internamente” indica una verifica annotata dall'amministratore; non è certificazione fiscale. Un profilo non verificato rimane utilizzabile per simulazioni, con stato **Bozza** su UI, storico e PDF.
 
-Apri **http://localhost:8088**. Frontend e API condividono l'origine grazie a Nginx. PostgreSQL usa un volume persistente; backend e database non espongono porte sull'host.
+## Regole e limiti
 
-```bash
-docker compose ps
-docker compose logs -f backend
-docker compose down
-```
-
-Il frontend è esposto sull'interfaccia locale. Autenticazione e pubblicazione Internet non fanno parte di questa fase.
-
-### Backend locale su un PostgreSQL esistente
-
-```bash
-cd backend
-export DB_URL='jdbc:postgresql://localhost:5432/progettoluce'
-export DB_USER='luce'
-export DB_PASSWORD='la-tua-password'
-mvn spring-boot:run
-```
-
-Il database deve esistere ed essere accessibile. Flyway crea le tabelle con `V1__schema_iniziale.sql`; Hibernate verifica lo schema, senza modificarlo.
-
-## Prima consulenza
-
-1. **Parametri gestore:** inserisci valori applicabili alla fornitura, nome profilo e fonte. Tutti i valori sono espliciti, anche gli zeri.
-2. **Offerte:** crea un'offerta. PCV espresso in €/anno; prezzi e spread in €/kWh, perdite escluse.
-3. **Bollette clienti:** inserisci cliente, POD, potenza, totale e consumi mensili. Per un'offerta indicizzata inserisci il PUN delle fasce utilizzate.
-4. **Confronto:** seleziona bolletta e offerta attiva. Il risultato viene salvato automaticamente.
-5. **Storico:** riapri un risultato anche se le condizioni commerciali sono cambiate.
-
-## Scaricare il risultato in PDF
-
-Nel menu apri **Impostazioni PDF**: scegli uno dei quattro stili (Classico, Essenziale, Editoriale, Sintesi cliente), il colore, il logo PNG/JPEG e i recapiti del consulente. Premi **Salva impostazioni PDF**: la configurazione è salvata nel database e applicata automaticamente a ogni download, anche dallo storico e da altri browser. Le modifiche non salvate sono una bozza.
-
-L’anteprima a destra usa un documento dimostrativo, disponibile anche senza confronti. Mostra **un foglio A4 intero alla volta**, con frecce precedente/successiva. Su mobile l’anteprima è sotto i controlli.
-
-Dopo **Calcola confronto**, premi **Scarica PDF**. Lo stesso pulsante è disponibile nello **Storico**, dopo aver aperto un confronto. Non occorre scegliere nuovamente lo stile. La migration Flyway V2 crea automaticamente la tabella delle impostazioni all’avvio: conserva il volume PostgreSQL esistente.
-
-Il documento A4 contiene cliente/POD, offerta, periodo, importi e risparmio, proiezione annuale indicativa, dettaglio delle righe, consumi/PUN e parametri utilizzati. Include font incorporati, intestazione e numeri di pagina. Usa i dati salvati del confronto: modifica o cancellazione delle condizioni originali non cambiano il documento. Le cifre vengono formattate per la stampa, senza ripetere il calcolo.
-
-Endpoint: `GET /api/confronti/{id}/pdf` per il report con le impostazioni salvate e `POST /api/confronti/{id}/pdf` con opzioni grafiche per il report personalizzato, risposta `application/pdf` e nome `confronto-{id}.pdf`. I font DejaVu e la loro licenza sono inclusi nel backend; non servono browser o programmi PDF installati sul server.
-
-## Regole e limiti del modello iniziale
-
-Questo è un **simulatore parametrico**, non un motore certificato di fatturazione ARERA.
-
-- Periodi composti da 1–12 mesi interi consecutivi; periodi parziali non implementati.
-- Per ogni fascia si applicano le perdite alla quantità. Con il flag Excel, le perdite sono arrotondate a kWh interi per fascia.
-- Per un indicizzato: `(PUN del mese e della fascia + spread) × kWh con perdite`. PUN mancante = errore, senza fallback.
-- PCV annuale diviso per 12; quota potenza di trasporto in €/kW/anno divisa per 12.
-- Trasporto variabile, oneri variabili e accisa usano i kWh netti. Dispacciamento usa i kWh con perdite.
-- Accisa uniforme configurabile. Esenzioni, scaglioni, residenza e aliquote IVA miste non sono ancora modellati.
-- IVA: unica aliquota della bolletta, applicata all'imponibile arrotondato. Altre partite imponibili prima dell'IVA, esenti dopo.
-- Altre partite riportate sul costo proposto: valuta manualmente se una voce è davvero trasferibile. Il caso va trattato separatamente se non lo è.
-- Stima annuale = risparmio periodo × 12 / mesi, senza stagionalità o previsione del PUN.
-- Tutta la logica economica Java usa `BigDecimal`. Le API espongono decimali come stringhe; il browser li conserva come tali. Le conversioni numeriche del grafico servono solo alla visualizzazione.
+- Righe a otto decimali, `HALF_UP`. Le basi vengono sommate e arrotondate a centesimi **per aliquota**, poi l'IVA è calcolata per ciascuna base. Totale = basi arrotondate + IVA + partite esenti.
+- Le percentuali di incidenza delle categorie sono sul totale IVA inclusa. Le categorie sono importi prima dell'IVA e le altre partite includono gli esenti; la quota IVA completa la composizione.
+- Mesi interi consecutivi: non si calcolano prorata giornalieri, scaglioni/esenzioni accisa o fiscalità automaticamente. Le voci e le aliquote vanno configurate e verificate per la fornitura.
+- Il controllo delle quote mensili riguarda tutte le quote fisse/di potenza; non offre prorata diversi per ogni componente.
+- PUN inserito per mese/fascia: nessun fallback automatico a valori domestici o indici stimati.
+- La partita IVA è controllata nel formato, non nel checksum o nel registro fiscale.
+- Annualizzazione = differenza × 12 / mesi. Per due mesi equivale a ×6; non è una previsione.
+- Input e profili sono conservati nel risultato; modificare le tariffe non cambia lo storico. I PDF sono generati da questi dati, senza ricalcolo.
 
 ## Test
 
 ```bash
-cd backend
-mvn verify
-```
-
-```bash
+mvn -f backend/pom.xml verify
 cd frontend
-npm ci
 npm test
 npm run build
-```
-
-La CI esegue anche la suite backend su PostgreSQL reale. I test locali usano H2 in modalità PostgreSQL, le migration Flyway e `ddl-auto=validate`. La configurazione usa il mock maker subclass, perché non sono richiesti mock di classi finali o metodi statici e non serve un agent JVM.
-
-Il job `compose` costruisce le immagini effettive, attende gli healthcheck e prova frontend, bundle, fallback SPA e API passando da Nginx. Crea il confronto sintetico da 77 € / 123 €, ricrea i container conservando il volume PostgreSQL e verifica che offerte, bollette e snapshot rimangano disponibili. I dati e il volume di questa prova sono isolati nel runner CI e rimossi al termine. Gli header di sicurezza vengono verificati su pagine, asset e API.
-
-### Test nel browser
-
-Dopo `mvn package` nel backend:
-
-```bash
-cd frontend
-npm run build
-npx playwright install --with-deps chromium
+npx playwright install chromium
 npm run test:e2e
 ```
 
-Playwright avvia backend e frontend di test su porte 8081 e 5174, con database in memoria separato. Il test crea parametri, offerta e bolletta dall'interfaccia, verifica 77 € e 123 € di risparmio, riapre lo storico e controlla il layout a 390 px. Screenshot in `frontend/test-results/`, pubblicati anche come artefatti CI.
+La CI verifica anche PostgreSQL e Compose con dati sintetici. I test precedenti del motore domestico restano come regressione nel repository; i suoi controller sono abilitati soltanto con il profilo `domestico` e non sono esposti nell'avvio business standard. La UI domestica è conservata come riferimento in `DomesticApp.tsx`, non è la UI dell'app avviata.
 
-## Documentazione
+## Windows
 
-- [Architettura e contratto API](docs/ARCHITETTURA.md)
-- [Report della prima versione](docs/REPORT_FASE_1.md)
-- [PDF del risultato: implementazione e verifiche](docs/REPORT_PDF.md)
-- [Editor PDF: stili, personalizzazione e verifiche](docs/REPORT_EDITOR_PDF.md)
+Il workflow **Pacchetto Windows portabile** costruisce frontend e backend, incorpora la UI nel JAR, crea il runtime Java e verifica launcher, API, PDF, persistenza e browser su Windows. È attivato anche dai push su `simulatore-business`. Il profilo portable conserva H2 in `data/luce-business` e apre `http://127.0.0.1:8088`. Le istruzioni di packaging sono in `docs/WINDOWS_PORTABILE.md`; lo ZIP deve essere estratto interamente.
 
-Upload/OCR, confronto multi-offerta, dashboard KPI, autenticazione e ruoli sono fasi successive. La generazione del PDF del risultato è disponibile; il caricamento e la lettura automatica di bollette PDF non sono ancora implementati.
+## Documentazione tecnica
 
-## Fonti ufficiali (ramo integrazioneAPI)
-
-La sezione **Fonti ufficiali** importa i CSV del Portale Offerte, aggiorna i parametri domestici per mese e conserva le correzioni manuali. Un client API GME opzionale importa gli indici PUN per fascia con credenziali personali nel backend. Il confronto può usare questi dati mensili e ne salva la provenienza nello storico e nel PDF.
-
-Consulta [la guida di integrazione, attivazione GME e parametri da completare](docs/INTEGRAZIONE_API.md). `FONTI_AUTOMATICO=false` disattiva il recupero programmato. Non tutti i contratti/fiscalità sono coperti dal profilo standard: la guida descrive i controlli richiesti.
-
-## Prova su Windows senza Docker
-
-La distribuzione portabile include Java, interfaccia e database locale. Estrarre lo ZIP e aprire `Avvia ProgettoLuce.cmd`; chiudere con `Ferma ProgettoLuce.cmd`. Dati conservati nella cartella `data`. [Istruzioni e build](docs/WINDOWS_PORTABILE.md).
+Vedi [specifica e contratto del modulo business](docs/BUSINESS.md). I vecchi report del progetto domestico documentano il riferimento di partenza, non le nuove schermate business.

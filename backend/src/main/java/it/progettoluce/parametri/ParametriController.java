@@ -3,6 +3,7 @@ package it.progettoluce.parametri;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
+@org.springframework.context.annotation.Profile("domestico")
 @RestController
 @RequestMapping("/api/parametri")
 public class ParametriController {

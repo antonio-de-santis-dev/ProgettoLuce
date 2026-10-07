@@ -1,7 +1,7 @@
 name: Pacchetto Windows portabile
 on:
   push:
-    branches: [windows-portabile]
+    branches: [windows-portabile, simulatore-business]
   pull_request:
     branches: [integrazioneAPI, main]
   workflow_dispatch:
@@ -81,7 +81,7 @@ jobs:
           }
       - uses: actions/upload-artifact@v4
         with:
-          name: ProgettoLuce-Windows-x64
+          name: ProgettoLuce-Business-Windows-x64
           path: |
             dist-windows/ProgettoLuce-Windows-x64.zip
             dist-windows/SHA256.txt

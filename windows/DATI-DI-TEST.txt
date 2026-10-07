@@ -1,29 +1,23 @@
-DATI SINTETICI - SOLO PER TEST MANUALI
+DATI SINTETICI BUSINESS - SOLO PER TEST MANUALI
 
-1. PARAMETRI GESTORE
-Nome profilo: Profilo test manuale
-Fonte: Dati sintetici, gennaio 2026; non usare per consulenza reale
-Coefficiente perdite: 0
-Dispacciamento, trasporto fisso, trasporto potenza annuo, trasporto energia,
-oneri fissi, oneri energia e accisa: tutti 0
+1. TARIFFE
+Sbloccare con demo-business-local, creare un nuovo profilo.
+Nome: Profilo business di test; fonte: dati sintetici, non usare per consulenza.
+Validita: gennaio-dicembre 2026. Lasciare il profilo in bozza.
+Perdite: 10%, arrotondate per fascia.
+Prime sei voci (energia e perdite F1/F2/F3): 0,10 euro/kWh.
+PCV: 120 euro/anno. Altre voci: zero. IVA: 22% su tutte le voci.
 
-2. OFFERTA
-Fornitore: Gestore Demo
-Nome: Luce Fissa Test
-Tipo: Prezzo fisso; tariffa: Monoraria
-Prezzo F0: 0,10 euro/kWh
-PCV annua: 120 euro; offerta attiva
+2. SIMULATORE
+Ragione sociale: Impresa Demo; POD: IT001E00000000; potenza: 17,8 kW.
+Fattura precedente: 200 euro. Confermare che copre lo stesso periodo e POD.
+Gennaio 2026: consumi zero, disattivare le quote fisse.
+Febbraio 2026: F1/F2/F3 ciascuna 200 kWh, quote fisse attive.
+Selezionare il profilo creato per entrambi i mesi.
 
-3. BOLLETTA CLIENTE
-Cliente: Mario Rossi Test; POD: POD-DEMO
-Fornitore: Fornitore Demo; potenza: 3 kW
-Totale attuale: 200 euro; IVA: 10%
-Altre partite imponibili ed esenti: 0
-Mese: gennaio 2026; F1: 100 kWh; F2: 200 kWh; F3: 300 kWh
-
-4. CONFRONTO
-Selezionare la bolletta e l'offerta; utilizzare i parametri manuali.
-Atteso: materia energia 70 euro, IVA 7 euro, totale proposto 77 euro.
-Risparmio periodo: 123 euro (61,5%); proiezione annua: 1476 euro.
-Provare quattro stili, colori, logo, salvataggio impostazioni PDF ed esportazione.
-Riavviare con Ferma/Avvia: verificare che i dati e le impostazioni restino presenti.
+3. RISULTATO
+Imponibile: 76 euro. IVA: 16,72 euro. Totale: 92,72 euro.
+Differenza favorevole: 107,28 euro; proiezione annua: 643,68 euro.
+Scaricare il PDF e aprire il risultato dallo storico.
+Modificare il profilo: lo storico deve conservare i corrispettivi originali.
+Arrestare e riavviare: tariffe e simulazioni devono restare presenti.

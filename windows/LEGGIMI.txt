@@ -1,4 +1,4 @@
-PROGETTOLUCE - VERSIONE PORTABILE PER TEST - WINDOWS x64
+PROGETTOLUCE BUSINESS - VERSIONE PORTABILE - WINDOWS x64
 
 REQUISITI
 Windows 10/11 a 64 bit (processore Intel o AMD), browser aggiornato.
@@ -11,8 +11,9 @@ PRIMO AVVIO
    Evitare cartelle sincronizzate OneDrive o dischi di rete mentre l'app e aperta.
 2. Fare doppio clic su "Avvia ProgettoLuce.cmd".
 3. Attendere l'avvio. Il browser si apre su http://127.0.0.1:8088.
-4. Inserire parametri gestore, offerte e bollette, oppure usare i dati di esempio
-   indicati nel file DATI-DI-TEST.txt. I dati di esempio NON sono tariffe reali.
+4. Aprire Tariffe e sbloccare le modifiche con la chiave demo-business-local.
+   Creare un profilo e compilare il Simulatore. DATI-DI-TEST.txt contiene un esempio
+   sintetico: NON sono tariffe reali.
 
 CHIUSURA
 Chiudere il browser NON arresta il programma.
@@ -28,10 +29,10 @@ Non importare il database PostgreSQL della versione Docker in questa cartella.
 Questa copia parte vuota e non contiene dati o credenziali dell'autore.
 
 INTERNET
-Confronti, storico ed esportazione PDF funzionano senza Internet.
-La sincronizzazione delle fonti ufficiali richiede una connessione.
-GME richiede credenziali personali e resta facoltativo: non e incluso alcun account.
-Se mancano parametri ufficiali, utilizzare la modalita manuale con valori verificati.
+Simulazioni, storico ed esportazione PDF funzionano senza Internet.
+Le tariffe e il PUN sono inseriti manualmente con fonte e periodo di validita.
+La chiave locale serve a proteggere le modifiche delle tariffe.
+Non pubblicare questa versione locale su Internet.
 
 PROBLEMI
 Porta 8088 occupata: chiudere l'altra copia/applicazione e riprovare.

@@ -13,6 +13,7 @@ jobs:
       DB_PASSWORD: synthetic-compose-test-password
       FRONTEND_PORT: '8088'
       FONTI_AUTOMATICO: 'false'
+      BUSINESS_ADMIN_TOKEN: synthetic-business-ci-key
     steps:
       - uses: actions/checkout@v4
       - name: Build immagini e avvio dello stack

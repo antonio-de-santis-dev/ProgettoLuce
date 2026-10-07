@@ -26,7 +26,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles({"test", "domestico"})
 class ApiEndToEndTest {
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper json;

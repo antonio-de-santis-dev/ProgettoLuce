@@ -1,7 +1,7 @@
 import { it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import App from "../App";
+import App from "../DomesticApp";
 import { api } from "../api";
 
 it("la SPA apre direttamente la sezione offerte e mostra lo stato vuoto", async () => {

@@ -59,6 +59,11 @@ public class ApiExceptionHandler {
     return risposta(409, "Operazione incompatibile con i dati esistenti");
   }
 
+  @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+  ResponseEntity<Errore> accesso(org.springframework.web.server.ResponseStatusException e) {
+    return risposta(e.getStatusCode().value(), e.getReason() == null ? "Operazione non consentita" : e.getReason());
+  }
+
   private ResponseEntity<Errore> risposta(int status, String message) {
     return ResponseEntity.status(status).body(new Errore(message, Map.of()));
   }

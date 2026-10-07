@@ -1,5 +1,6 @@
 ﻿param([Parameter(Mandatory=$true)][string]$Package)
 $ErrorActionPreference = 'Stop'
+$env:BUSINESS_ADMIN_TOKEN = 'demo-business-local'
 $repo = Split-Path $PSScriptRoot -Parent
 $launcher = Join-Path $Package 'Launcher.ps1'
 # I launcher devono funzionare con PowerShell 5.1 incluso in Windows.

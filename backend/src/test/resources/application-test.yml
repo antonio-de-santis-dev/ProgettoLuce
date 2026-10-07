@@ -6,3 +6,6 @@ spring:
 
 fonti:
   automatico: false
+
+business:
+  admin-token: test-business-key

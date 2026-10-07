@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@org.springframework.context.annotation.Profile("domestico")
 @RestController
 @RequestMapping("/api/offerte")
 public class OffertaController {

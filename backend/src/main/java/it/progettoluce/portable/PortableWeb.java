@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 @Profile("portable")
 public class PortableWeb {
-  @GetMapping({"/bollette", "/offerte", "/parametri", "/fonti", "/impostazioni-pdf", "/storico"})
+  @GetMapping({"/tariffe", "/bollette", "/offerte", "/parametri", "/fonti", "/impostazioni-pdf", "/storico"})
   public String pagina() {
     return "forward:/index.html";
   }
