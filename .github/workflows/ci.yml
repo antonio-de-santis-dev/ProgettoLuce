@@ -11,7 +11,8 @@ jobs:
       DB_NAME: luce_compose_ci
       DB_USER: luce
       DB_PASSWORD: synthetic-compose-test-password
-      FRONTEND_PORT: '8088'
+      BUSINESS_PORT: '8089'
+      BUSINESS_TEST_URL: http://127.0.0.1:8089
       FONTI_AUTOMATICO: 'false'
       BUSINESS_ADMIN_TOKEN: synthetic-business-ci-key
     steps:
@@ -20,9 +21,9 @@ jobs:
         run: |
           docker compose config --quiet
           docker compose up --build -d --wait --wait-timeout 180
-      - name: Confronto tramite Nginx e API reali
+      - name: Simulazione business sulla porta 8089
         run: |
-          python3 scripts/carica-esempio.py http://127.0.0.1:8088/api
+          python3 scripts/carica-esempio.py http://127.0.0.1:8089/api
           python3 scripts/verifica-compose.py crea "$RUNNER_TEMP/confronto-compose.json"
       - name: Ricrea i container e verifica la persistenza del volume
         run: |

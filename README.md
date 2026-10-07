@@ -14,45 +14,43 @@ Simulatore locale della fornitura elettrica per imprese, sviluppato sul branch *
 - Modifica tariffe protetta da chiave amministratore; versione obsoleta = 409.
 - Risultato, categorie, incidenze, differenza e annualizzazione; storico paginato e PDF da snapshot.
 
-## Avvio locale senza Docker
+## Avvio con Docker e PostgreSQL
 
-Prerequisiti: **Java 17 JDK, Maven 3.6.3+ e Node.js 24**.
-
-```bash
-cd backend
-mvn spring-boot:run -Dspring-boot.run.profiles=demo
-```
-
-In un secondo terminale:
+Requisiti: Docker con Docker Compose. Il simulatore business usa **http://localhost:8089**.
 
 ```bash
-cd frontend
-npm ci
-npm run dev
-```
-
-Apri **http://localhost:5173**. Il backend demo ascolta soltanto su `127.0.0.1:8080`; il database H2 persistente usa `backend/data/luce-business`, distinto da quello domestico.
-
-In **Offerte e tariffe**, premi **Sblocca tariffe**. Per la sola demo locale la chiave predefinita è `demo-business-local`. Per impostarne una personale, esporta `BUSINESS_ADMIN_TOKEN` prima di avviare il backend. Non inviare né committare la chiave. Nel frontend rimane in memoria soltanto per quella pagina/sessione e il server la verifica a ogni modifica.
-
-Lo script `bash avvia-demo.sh` può avviare entrambi i servizi se i prerequisiti sono disponibili.
-
-## Docker e PostgreSQL
-
-```bash
+git fetch origin
+git switch simulatore-business
+git pull --ff-only origin simulatore-business
 cp .env.example .env
 # Imposta DB_PASSWORD e BUSINESS_ADMIN_TOKEN, con valori diversi e non vuoti.
-docker compose -p luce-business up --build -d --wait
+docker compose up --build -d --wait
 ```
 
-Apri **http://localhost:8088**. Il progetto `luce-business` usa un volume separato. Prima libera la porta se il programma domestico o il pacchetto Windows la stanno usando. Non sono richieste nuove porte per il simulatore.
+Se hai già un `.env`, conservalo e aggiungi `BUSINESS_ADMIN_TOKEN` e `BUSINESS_PORT=8089`.
+La vecchia variabile `FRONTEND_PORT` non viene usata dal business.
+Non sovrascrivere un `.env` che contiene credenziali o configurazioni da conservare.
+
+Apri **http://localhost:8089**. Frontend e API sono accessibili dalla stessa porta;
+backend e PostgreSQL rimangono sulla rete interna Docker. La versione domestica
+può continuare sulla porta 8088.
+
+Il nome Compose predefinito è `luce-business`: container, rete e volume PostgreSQL
+sono separati dalla versione domestica anche usando la stessa cartella Git.
+Non impostare `COMPOSE_PROJECT_NAME` uguale al progetto domestico.
 
 ```bash
-docker compose -p luce-business logs -f backend
-docker compose -p luce-business down
+docker compose logs -f backend
+docker compose down
 ```
 
-Non aggiungere `--volumes` se vuoi conservare i dati. Per esporre l'applicazione come servizio pubblico occorrono utenti, autorizzazione sulle simulazioni e isolamento fra consulenti: la chiave protegge le tariffe, non costituisce un sistema multiutente.
+Non aggiungere `--volumes` se vuoi conservare i dati. Per esporre l'applicazione
+come servizio pubblico occorrono utenti, autorizzazione sulle simulazioni e
+isolamento fra consulenti: la chiave protegge le tariffe, non costituisce un
+sistema multiutente.
+
+In **Offerte e tariffe**, premi **Sblocca tariffe** e usa il valore di
+`BUSINESS_ADMIN_TOKEN` del tuo `.env`.
 
 ## Prima simulazione
 
@@ -66,10 +64,10 @@ Non aggiungere `--volumes` se vuoi conservare i dati. Per esporre l'applicazione
 Per un caso sintetico, con backend acceso:
 
 ```bash
-python3 scripts/carica-esempio.py
+python3 scripts/carica-esempio.py http://127.0.0.1:8089/api
 ```
 
-Il caso crea gennaio con consumi/quote zero e febbraio con 600 kWh, perdite 10%, prezzo 0,10 €/kWh, PCV 120 €/anno e IVA 22%: imponibile **76 €**, totale **92,72 €**, differenza contro 200 € **107,28 €**, annualizzazione su due mesi **643,68 €**. I dati sono esclusivamente di test. Lo script crea nuovi record a ogni esecuzione. Con Docker indica `http://127.0.0.1:8088/api` ed esporta la chiave amministratore del tuo `.env`.
+Il caso crea gennaio con consumi/quote zero e febbraio con 600 kWh, perdite 10%, prezzo 0,10 €/kWh, PCV 120 €/anno e IVA 22%: imponibile **76 €**, totale **92,72 €**, differenza contro 200 € **107,28 €**, annualizzazione su due mesi **643,68 €**. I dati sono esclusivamente di test. Lo script crea nuovi record a ogni esecuzione. Con Docker indica `http://127.0.0.1:8089/api` ed esporta la chiave amministratore del tuo `.env`.
 
 ## Scelte rispetto alla specifica
 
@@ -103,9 +101,11 @@ npm run test:e2e
 
 La CI verifica anche PostgreSQL e Compose con dati sintetici. I test precedenti del motore domestico restano come regressione nel repository; i suoi controller sono abilitati soltanto con il profilo `domestico` e non sono esposti nell'avvio business standard. La UI domestica è conservata come riferimento in `DomesticApp.tsx`, non è la UI dell'app avviata.
 
-## Windows
+## Distribuzione
 
-Il workflow **Pacchetto Windows portabile** costruisce frontend e backend, incorpora la UI nel JAR, crea il runtime Java e verifica launcher, API, PDF, persistenza e browser su Windows. È attivato anche dai push su `simulatore-business`. Il profilo portable conserva H2 in `data/luce-business` e apre `http://127.0.0.1:8088`. Le istruzioni di packaging sono in `docs/WINDOWS_PORTABILE.md`; lo ZIP deve essere estratto interamente.
+Il branch business viene distribuito con Docker. Il workflow Windows è stato
+rimosso da questo branch. La versione portabile preparata per il collega resta
+nel branch `windows-portabile` della repository.
 
 ## Documentazione tecnica
 

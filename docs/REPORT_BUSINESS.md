@@ -47,3 +47,13 @@ lo scarto di 8,32 € non viene nascosto con una correzione arbitraria.
 Le tariffe reali, la fiscalità e i riferimenti Excel devono essere validati sui dati
 originali. Il modello iniziale è una bozza e non contiene prezzi di mercato.
 Scaglioni, esenzioni e prorata giornalieri non sono determinati automaticamente.
+
+
+## Correzione della distribuzione
+
+Il business si avvia con Docker sulla porta 8089 e progetto Compose `luce-business`.
+La variabile dedicata `BUSINESS_PORT` evita di ereditare `FRONTEND_PORT=8088` dal
+programma domestico. La CI usa 8089 per calcolo, PDF e persistenza.
+Il workflow del pacchetto Windows è rimosso da questo branch; la versione del
+collega rimane nel branch `windows-portabile`. I risultati Windows sopra citati
+si riferiscono alla prima implementazione, non alla distribuzione richiesta.

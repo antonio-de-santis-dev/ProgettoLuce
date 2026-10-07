@@ -69,4 +69,13 @@ Demo e portable bind su loopback, DB business distinto. Docker frontend su loopb
 
 Nuovi test: aggregati riconciliati del documento; IVA mista/esenti/accrediti; perdite Excel; quote di potenza e annuali; mesi/scadenza; PUN mancante/esplicito; zero/negativi; profili diversi/bozza; permessi API; versioni obsolete e revisioni; snapshot/PDF immutabili; payload storico leggero. Test browser: creazione tariffa, due mesi, quote zero/gennaio, risultato 92,72, differenza 107,28, annualizzazione 643,68, download PDF, riapertura storico e layout mobile.
 
-Le vecchie suite domestiche sono conservate; i vecchi E2E sono spostati in frontend/domestico-e2e come riferimento. Il nuovo workflow verifica il programma business. Le verifiche Windows vengono eseguite in GitHub Actions, non in Linux.
+Le vecchie suite domestiche sono conservate; i vecchi E2E sono spostati in frontend/domestico-e2e come riferimento. Il nuovo workflow verifica il programma business. La CI del branch business verifica Docker/PostgreSQL sulla porta 8089. Il workflow Windows non viene eseguito su questo branch.
+
+
+## Avvio Docker business
+
+`docker compose up --build -d --wait`, dopo aver impostato `.env`.
+URL: `http://localhost:8089`. Variabile dedicata `BUSINESS_PORT`, predefinita 8089;
+`FRONTEND_PORT` della versione domestica non ha effetto su questo branch.
+Nome del progetto Compose: `luce-business`; volume PostgreSQL separato.
+Chiave per modifica tariffe: `BUSINESS_ADMIN_TOKEN` del `.env`.
