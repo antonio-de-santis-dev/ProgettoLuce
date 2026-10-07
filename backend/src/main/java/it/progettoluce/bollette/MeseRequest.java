@@ -10,4 +10,13 @@ public record MeseRequest(
     @NotNull @PositiveOrZero @Digits(integer = 8, fraction = 6) BigDecimal f1,
     @NotNull @PositiveOrZero @Digits(integer = 8, fraction = 6) BigDecimal f2,
     @NotNull @PositiveOrZero @Digits(integer = 8, fraction = 6) BigDecimal f3,
-    @Valid Prezzi pun) {}
+    @Valid Prezzi pun,
+    @Min(0) @Max(1) Integer quoteFisse) {
+  public MeseRequest {
+    if (quoteFisse == null) quoteFisse = 1;
+  }
+
+  public MeseRequest(String mese, BigDecimal f1, BigDecimal f2, BigDecimal f3, Prezzi pun) {
+    this(mese, f1, f2, f3, pun, 1);
+  }
+}

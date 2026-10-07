@@ -16,4 +16,40 @@ public record ParametriRequest(
     @NotNull @PositiveOrZero @Digits(integer = 8, fraction = 8) BigDecimal oneriFissiMese,
     @NotNull @PositiveOrZero @Digits(integer = 8, fraction = 8) BigDecimal oneriKwh,
     @NotNull @PositiveOrZero @Digits(integer = 8, fraction = 8) BigDecimal accisaKwh,
-    @PositiveOrZero Long versione) {}
+    @PositiveOrZero Long versione,
+    @PositiveOrZero @Digits(integer = 8, fraction = 8) BigDecimal oneriPotenzaMese,
+    boolean oneriSuPerdite) {
+  public ParametriRequest {
+    if (oneriPotenzaMese == null) oneriPotenzaMese = BigDecimal.ZERO;
+  }
+
+  public ParametriRequest(
+      String nomeProfilo,
+      String fonte,
+      BigDecimal coefficientePerdite,
+      boolean arrotondaPerdite,
+      BigDecimal dispacciamentoKwh,
+      BigDecimal trasportoFissoMese,
+      BigDecimal trasportoPotenzaAnno,
+      BigDecimal trasportoKwh,
+      BigDecimal oneriFissiMese,
+      BigDecimal oneriKwh,
+      BigDecimal accisaKwh,
+      Long versione) {
+    this(
+        nomeProfilo,
+        fonte,
+        coefficientePerdite,
+        arrotondaPerdite,
+        dispacciamentoKwh,
+        trasportoFissoMese,
+        trasportoPotenzaAnno,
+        trasportoKwh,
+        oneriFissiMese,
+        oneriKwh,
+        accisaKwh,
+        versione,
+        BigDecimal.ZERO,
+        false);
+  }
+}

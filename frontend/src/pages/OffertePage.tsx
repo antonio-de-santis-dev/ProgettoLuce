@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState, type FormEvent } from "react";
 import { Plus, Pencil, Trash2, Search, CheckCircle2 } from "lucide-react";
 import { api, messaggioErrore, useLista } from "../api";
@@ -190,6 +191,11 @@ export default function OffertePage() {
   }
   return (
     <>
+      <p className="help">
+        <Link to="/tariffe">
+          Gestisci le tariffe delle simulazioni dettagliate
+        </Link>
+      </p>
       <Titolo
         eyebrow="Configurazione commerciale"
         title="Le tue offerte"

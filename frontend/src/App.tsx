@@ -1,29 +1,43 @@
 import { useEffect, useState } from "react";
-import { NavLink, Route, Routes, Link, useLocation } from "react-router-dom";
+import { NavLink, Routes, Route, useLocation, Link } from "react-router-dom";
 import {
-  Building2,
-  Calculator,
+  Zap,
+  ArrowLeftRight,
+  Tags,
+  FileText,
   SlidersHorizontal,
   History,
   Menu,
   X,
   ArrowUpRight,
 } from "lucide-react";
+import "./business/business.css";
 import Simulatore from "./business/Simulatore";
 import Tariffe from "./business/Tariffe";
-import Storico from "./business/Storico";
-import "./business/business.css";
+import StoricoBusiness from "./business/Storico";
+import ConfrontoPage from "./pages/ConfrontoPage";
+import OffertePage from "./pages/OffertePage";
+import BollettePage from "./pages/BollettePage";
+import ParametriPage from "./pages/ParametriPage";
+import FontiPage from "./pages/FontiPage";
+import StoricoPage from "./pages/StoricoPage";
+import ImpostazioniPdfPage from "./pages/ImpostazioniPdfPage";
+
 const nav = [
-  { to: "/", name: "Simulatore", icon: Calculator },
-  { to: "/tariffe", name: "Offerte e tariffe", icon: SlidersHorizontal },
-  { to: "/storico", name: "Storico", icon: History },
+  { to: "/", label: "Confronto", icon: ArrowLeftRight },
+  { to: "/bollette", label: "Bollette clienti", icon: FileText },
+  { to: "/offerte", label: "Offerte", icon: Tags },
+  { to: "/parametri", label: "Parametri gestore", icon: SlidersHorizontal },
+  { to: "/fonti", label: "Fonti ufficiali", icon: SlidersHorizontal },
+  { to: "/impostazioni-pdf", label: "Impostazioni PDF", icon: FileText },
+  { to: "/storico", label: "Storico", icon: History },
 ];
 export default function App() {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   useEffect(() => {
     setOpen(false);
-    document.title = `${nav.find((n) => n.to === location.pathname)?.name ?? "Pagina non trovata"} · Luce Business`;
+    document.title = `${nav.find((n) => n.to === location.pathname)?.label ?? "Pagina non trovata"} · Progetto Luce Business`;
     document.querySelector<HTMLElement>("#main-content")?.focus();
     window.scrollTo(0, 0);
   }, [location.pathname]);
@@ -38,7 +52,6 @@ export default function App() {
       >
         {open && (
           <button
-            type="button"
             className="icon-button business-nav-close"
             aria-label="Chiudi menu"
             onClick={() => setOpen(false)}
@@ -46,9 +59,9 @@ export default function App() {
             <X size={20} />
           </button>
         )}
-        <Link className="brand" to="/">
+        <Link to="/" className="brand" aria-label="Progetto Luce Business">
           <span>
-            <Building2 size={24} />
+            <Zap size={23} fill="currentColor" />
           </span>
           <div>
             progetto
@@ -58,35 +71,37 @@ export default function App() {
           </div>
         </Link>
         <span className="business-tag">BUSINESS</span>
-        <p className="nav-caption">CONSULENZA ALLE IMPRESE</p>
+        <p className="nav-caption">PROGETTO LUCE BUSINESS</p>
         <nav aria-label="Navigazione principale">
           {nav.map((n) => (
             <NavLink
+              key={n.to}
+              to={n.to}
               end
               className={({ isActive }) =>
                 isActive ? "nav-link active" : "nav-link"
               }
-              key={n.to}
-              to={n.to}
             >
-              <n.icon size={20} />
-              {n.name}
+              <n.icon size={19} />
+              <span>{n.label}</span>
             </NavLink>
           ))}
         </nav>
         <div className="sidebar-foot">
-          <div className="mini-sun">✳</div>
+          <div className="mini-sun" aria-hidden="true">
+            ✳
+          </div>
           <h3>
-            Energia chiara.
+            Ogni scelta
             <br />
-            Scelte d’impresa.
+            merita chiarezza.
           </h3>
           <p>
-            Ogni voce spiegata.
+            Consumi reali.
             <br />
-            Ogni scenario conservato.
+            Calcoli trasparenti.
           </p>
-          <span>LUCE BUSINESS · V1.0</span>
+          <span>PROGETTO LUCE BUSINESS</span>
         </div>
       </aside>
       {open && (
@@ -96,38 +111,60 @@ export default function App() {
           onClick={() => setOpen(false)}
         />
       )}
-      <div className="workspace">
+      <div
+        className={
+          location.pathname === "/impostazioni-pdf"
+            ? "workspace workspace-pdf"
+            : "workspace"
+        }
+      >
         <header className="topbar">
           <div className="breadcrumb">
             <button
               className="icon-button mobile-menu"
-              aria-expanded={open}
               aria-label="Apri menu"
               aria-controls="business-navigation"
+              aria-expanded={open}
               onClick={() => setOpen(!open)}
             >
-              {open ? <X /> : <Menu />}
+              {open ? <X size={21} /> : <Menu size={21} />}
             </button>
             <span>Business</span>
             <span className="slash">/</span>
             <strong>
-              {nav.find((n) => n.to === location.pathname)?.name ?? "404"}
+              {nav.find((n) => n.to === location.pathname)?.label ?? "404"}
             </strong>
           </div>
-          <span className="business-local">Workspace locale</span>
+          <div className="topbar-right">
+            <span className="topbar-label">
+              <span className="status-dot" />
+              Consulenza alle imprese
+            </span>
+            <div className="avatar" aria-label="Area consulente">
+              PL
+            </div>
+          </div>
         </header>
         <main id="main-content" tabIndex={-1}>
           <Routes>
-            <Route path="/" element={<Simulatore />} />
+            <Route path="/" element={<ConfrontoPage />} />
+            <Route path="/offerte" element={<OffertePage />} />
+            <Route path="/bollette" element={<BollettePage />} />
+            <Route path="/parametri" element={<ParametriPage />} />
+            <Route path="/impostazioni-pdf" element={<ImpostazioniPdfPage />} />
+            <Route path="/fonti" element={<FontiPage />} />
+            <Route path="/storico" element={<StoricoPage />} />
+            <Route path="/simulatore" element={<Simulatore />} />
             <Route path="/tariffe" element={<Tariffe />} />
-            <Route path="/storico" element={<Storico />} />
+            <Route path="/storico-simulazioni" element={<StoricoBusiness />} />
             <Route
               path="*"
               element={
                 <div className="empty">
                   <h1>Pagina non trovata</h1>
                   <Link to="/" className="button primary">
-                    Apri il simulatore <ArrowUpRight size={18} />
+                    Torna al confronto
+                    <ArrowUpRight size={18} />
                   </Link>
                 </div>
               }
@@ -135,8 +172,10 @@ export default function App() {
           </Routes>
         </main>
         <footer className="workspace-footer">
-          <span>ProgettoLuce Business · Consulenza energetica</span>
-          <span>Simulazione parametrica · Dati e tariffe versionati</span>
+          <span>
+            Progetto Luce Business · Strumenti per consulenti energetici
+          </span>
+          <span>Calcolo parametrico · Prima versione</span>
         </footer>
       </div>
     </div>

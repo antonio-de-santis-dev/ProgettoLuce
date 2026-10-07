@@ -31,14 +31,14 @@ export default function FontiPage() {
         .toLocaleDateString("sv-SE", { timeZone: "Europe/Rome" })
         .slice(0, 7),
     ),
-    [categoria, setCategoria] = useState("DOMESTICO_RESIDENTE"),
+    [categoria, setCategoria] = useState("INDICE"),
     [error, setError] = useState(""),
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [edit, setEdit] = useState<DatoFonte | null>(null),
     [valore, setValore] = useState(""),
     [motivo, setMotivo] = useState(""),
-    [codice, setCodice] = useState("coefficientePerdite"),
+    [codice, setCodice] = useState("PUN_F0"),
     [revisioni, setRevisioni] = useState<Revisione[] | null>(null),
     [titoloStorico, setTitoloStorico] = useState(""),
     [periodoGme, setPeriodoGme] = useState("");
@@ -162,6 +162,12 @@ export default function FontiPage() {
   );
   return (
     <div className="fonti-page">
+      <p className="notice">
+        Business: consulta gli indici PUN e i riferimenti pubblicati. I profili
+        domestici non vengono applicati al confronto; trasporto, oneri e
+        fiscalità si configurano in Parametri gestore per la fornitura
+        dell’impresa.
+      </p>
       <Titolo
         eyebrow="Dati aggiornati, scelte trasparenti"
         title="Fonti ufficiali"
@@ -275,10 +281,6 @@ export default function FontiPage() {
               }}
               disabled={busy}
             >
-              <option value="DOMESTICO_RESIDENTE">Domestico residente</option>
-              <option value="DOMESTICO_NON_RESIDENTE">
-                Domestico non residente
-              </option>
               <option value="INDICE">Indici PUN</option>
               <option value="ORIGINALE">
                 Tutti i valori pubblicati (sola lettura)

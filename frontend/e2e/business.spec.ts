@@ -3,11 +3,6 @@ test("profilo business, simulazione, PDF, versioni e vista mobile", async ({
   page,
 }) => {
   await page.goto("/tariffe");
-  await page.getByRole("button", { name: "Sblocca tariffe" }).click();
-  await page
-    .getByLabel("Chiave amministratore")
-    .fill(process.env.BUSINESS_ADMIN_TOKEN ?? "demo-business-local");
-  await page.getByRole("button", { name: "Sblocca modifiche" }).click();
   await page.getByRole("button", { name: "Nuovo profilo" }).click();
   await page
     .getByLabel("Nome offerta / profilo")
@@ -28,7 +23,7 @@ test("profilo business, simulazione, PDF, versioni e vista mobile", async ({
   await expect(
     page.getByRole("heading", { name: "Profilo browser business" }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "Simulatore", exact: true }).click();
+  await page.goto("/simulatore");
   await page.getByLabel("Ragione sociale").fill("Impresa browser");
   await page
     .getByRole("textbox", { name: "POD", exact: true })
@@ -62,19 +57,12 @@ test("profilo business, simulazione, PDF, versioni e vista mobile", async ({
   expect(download.suggestedFilename()).toMatch(
     /^simulazione-business-\d+\.pdf$/,
   );
-  await page.getByRole("link", { name: "Storico", exact: true }).click();
+  await page.goto("/storico-simulazioni");
   await page.getByRole("button", { name: "Apri", exact: true }).first().click();
   await expect(
     page.getByText("92,72 €", { exact: true }).first(),
   ).toBeVisible();
-  await page
-    .getByRole("link", { name: "Offerte e tariffe", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Sblocca tariffe" }).click();
-  await page
-    .getByLabel("Chiave amministratore")
-    .fill(process.env.BUSINESS_ADMIN_TOKEN ?? "demo-business-local");
-  await page.getByRole("button", { name: "Sblocca modifiche" }).click();
+  await page.goto("/tariffe");
   await page
     .getByRole("button", { name: "Modifica", exact: true })
     .first()
@@ -90,7 +78,7 @@ test("profilo business, simulazione, PDF, versioni e vista mobile", async ({
     .click();
   await expect(page.getByText(/Versione 0/)).toBeVisible();
   await page.getByRole("button", { name: "Chiudi", exact: true }).click();
-  await page.getByRole("link", { name: "Storico", exact: true }).click();
+  await page.goto("/storico-simulazioni");
   await page.getByRole("button", { name: "Apri", exact: true }).first().click();
   await expect(
     page.getByText("92,72 €", { exact: true }).first(),

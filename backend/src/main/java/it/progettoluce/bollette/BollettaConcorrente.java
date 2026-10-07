@@ -16,6 +16,9 @@ public class BollettaConcorrente {
   @Column(nullable = false, length = 150)
   private String cliente;
 
+  @Column(length = 11)
+  private String partitaIva;
+
   @Column(nullable = false, length = 30)
   private String pod;
 
@@ -53,6 +56,7 @@ public class BollettaConcorrente {
         throw new IllegalArgumentException("I mesi devono essere consecutivi e senza duplicati");
     }
     cliente = r.cliente().trim();
+    partitaIva = r.partitaIva();
     pod = r.pod().trim();
     fornitore = r.fornitore().trim();
     potenzaKw = r.potenzaKw();
@@ -117,6 +121,7 @@ public class BollettaConcorrente {
         altrePartiteImponibili,
         altrePartiteEsenti,
         mesi.stream().map(MeseBolletta::dati).toList(),
-        versione);
+        versione,
+        partitaIva);
   }
 }

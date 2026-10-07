@@ -7,7 +7,6 @@ import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.Service;
 
 @Service
-@org.springframework.context.annotation.Profile("domestico")
 @EnableScheduling
 public class SincronizzazioneFonti {
   public record Stato(

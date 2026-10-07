@@ -28,9 +28,6 @@ export default function ConfrontoPage() {
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [risultato, setRisultato] = useState<Confronto | null>(null);
-  const [usaFonti, setUsaFonti] = useState(false),
-    [categoria, setCategoria] = useState("DOMESTICO_RESIDENTE"),
-    [conferma, setConferma] = useState(false);
   const attive = offerte.data.filter((o) => o.attiva),
     selected = bollette.data.find((b) => String(b.id) === bolletta);
   async function submit(e: FormEvent) {
@@ -42,9 +39,7 @@ export default function ConfrontoPage() {
       const { data } = await api.post<Confronto>("/confronti", {
         bollettaId: bolletta,
         offertaId: offerta,
-        usaFontiUfficiali: usaFonti,
-        categoria: usaFonti ? categoria : null,
-        confermaStandard: usaFonti && conferma,
+        usaFontiUfficiali: false,
       });
       setRisultato(data);
     } catch (e) {
@@ -86,7 +81,7 @@ export default function ConfrontoPage() {
     <>
       <Titolo
         eyebrow="Il tuo spazio di consulenza"
-        title="Il risparmio, nero su bianco."
+        title="Il risparmio della tua impresa, nero su bianco."
         description="Confronta la bolletta del cliente con la tua offerta. Stessi consumi, ogni voce spiegata."
       />
       <div className="intro-banner">
@@ -108,7 +103,7 @@ export default function ConfrontoPage() {
         <span className="banner-stamp">
           PROGETTO
           <br />
-          <strong>LUCE</strong>
+          <strong>LUCE BUSINESS</strong>
         </span>
       </div>
       {bollette.loading || offerte.loading ? (
@@ -201,64 +196,11 @@ export default function ConfrontoPage() {
                 {busy ? "Calcolo…" : "Calcola confronto"}
               </button>
             </div>
-            <details className="fonti-choice">
-              <summary>Parametri del confronto</summary>
-              <label>
-                <input
-                  type="checkbox"
-                  checked={usaFonti}
-                  onChange={(e) => {
-                    setUsaFonti(e.target.checked);
-                    setRisultato(null);
-                  }}
-                />{" "}
-                Usa i parametri mensili delle fonti ufficiali e le mie
-                correzioni
-              </label>
-              {usaFonti && (
-                <>
-                  <label className="field">
-                    <span>Profilo della fornitura</span>
-                    <select
-                      value={categoria}
-                      onChange={(e) => {
-                        setCategoria(e.target.value);
-                        setRisultato(null);
-                      }}
-                    >
-                      <option value="DOMESTICO_RESIDENTE">
-                        Domestico residente
-                      </option>
-                      <option value="DOMESTICO_NON_RESIDENTE">
-                        Domestico non residente
-                      </option>
-                    </select>
-                  </label>
-                  <label>
-                    <input
-                      type="checkbox"
-                      required
-                      checked={conferma}
-                      onChange={(e) => setConferma(e.target.checked)}
-                    />{" "}
-                    Ho verificato che il dispacciamento standard CdispD sia
-                    compatibile con l’offerta e non sia già incluso nel prezzo.
-                    Ho verificato che IVA e accisa siano applicabili a questo
-                    cliente e ai suoi consumi.
-                  </label>
-                  <p className="help">
-                    I dati devono essere disponibili per ogni mese. Per
-                    residenti fino a 3 kW verifica l’accisa.{" "}
-                    <Link to="/fonti">Controlla e modifica le fonti</Link>.
-                  </p>
-                </>
-              )}
-              {!usaFonti && (
-                <p className="help">
-                  Il confronto usa il profilo manuale e il PUN della bolletta.
-                </p>
-              )}
-            </details>
+            <p className="help">
+              Il confronto business usa i parametri gestore configurati e il PUN
+              mensile della bolletta.{" "}
+              <Link to="/fonti">Consulta le fonti ufficiali</Link>.
+            </p>
             {selected && (
               <p className="help">
                 {numero(consumo(selected.dati), 3)} kWh ·{" "}
@@ -275,6 +217,11 @@ export default function ConfrontoPage() {
           </form>
         </>
       )}
+      <p className="help">
+        <Link to="/simulatore">
+          Simulazione dettagliata con tariffe mensili e IVA per voce
+        </Link>
+      </p>
       {risultato && <RisultatoView confronto={risultato} />}
     </>
   );

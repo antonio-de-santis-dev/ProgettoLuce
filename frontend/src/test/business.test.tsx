@@ -11,7 +11,7 @@ import {
   nuovoMese,
 } from "../business/model";
 import Tariffe from "../business/Tariffe";
-it("il workspace business indirizza alle tariffe se nessun profilo è configurato", async () => {
+it("il workspace business mantiene le sette sezioni del programma originale", async () => {
   vi.spyOn(api, "get").mockResolvedValue({ data: [] });
   render(
     <MemoryRouter>
@@ -19,11 +19,27 @@ it("il workspace business indirizza alle tariffe se nessun profilo è configurat
     </MemoryRouter>,
   );
   expect(
-    await screen.findByText("Comincia dalle condizioni della fornitura."),
+    await screen.findByRole("heading", {
+      name: "Il risparmio della tua impresa, nero su bianco.",
+    }),
   ).toBeVisible();
+  const nav = screen.getByRole("navigation", {
+    name: "Navigazione principale",
+  });
+  expect(nav.querySelectorAll("a")).toHaveLength(7);
+  for (const name of [
+    "Confronto",
+    "Bollette clienti",
+    "Offerte",
+    "Parametri gestore",
+    "Fonti ufficiali",
+    "Impostazioni PDF",
+    "Storico",
+  ])
+    expect(screen.getByRole("link", { name })).toBeVisible();
   expect(
-    screen.getByRole("link", { name: /Configura le tariffe/ }),
-  ).toHaveAttribute("href", "/tariffe");
+    screen.getByRole("link", { name: "Progetto Luce Business" }),
+  ).toBeVisible();
 });
 it("un profilo parte in bozza con unità di potenza e IVA modificabili", () => {
   const p = nuovoProfilo();
@@ -50,7 +66,7 @@ it("somma consumi senza precisione binaria", () => {
   m.f2 = "0.2";
   expect(consumo(m)).toBe("0.3");
 });
-it("richiede una chiave prima di mostrare il form di modifica", async () => {
+it("consente di configurare le tariffe senza chiave amministratore", async () => {
   Object.defineProperty(HTMLDialogElement.prototype, "showModal", {
     configurable: true,
     value: function () {
@@ -66,8 +82,8 @@ it("richiede una chiave prima di mostrare il form di modifica", async () => {
   vi.spyOn(api, "get").mockResolvedValue({ data: [] });
   render(<Tariffe />);
   await userEvent.click(screen.getByRole("button", { name: "Nuovo profilo" }));
-  expect(screen.getByLabelText(/Chiave amministratore/)).toBeVisible();
   expect(
-    screen.queryByLabelText("Nome offerta / profilo"),
+    screen.queryByLabelText(/Chiave amministratore/),
   ).not.toBeInTheDocument();
+  expect(screen.getByLabelText(/Nome offerta \/ profilo/)).toBeVisible();
 });

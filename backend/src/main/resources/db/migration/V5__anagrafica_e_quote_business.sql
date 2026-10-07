@@ -1,0 +1,2 @@
+ALTER TABLE bollette ADD COLUMN partita_iva VARCHAR(11);
+ALTER TABLE mesi_bolletta ADD COLUMN quote_fisse INTEGER NOT NULL DEFAULT 1;

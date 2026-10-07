@@ -25,12 +25,10 @@ import {
 } from "./model";
 function Editor({
   initial,
-  token,
   onClose,
   onSaved,
 }: {
   initial: Profilo | null;
-  token: string;
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -52,10 +50,9 @@ function Editor({
     setError("");
     try {
       const payload = payloadProfilo(form, initial?.versione);
-      const options = { headers: { "X-Business-Admin": token } };
-      if (initial)
-        await api.put(`/business/profili/${initial.id}`, payload, options);
-      else await api.post("/business/profili", payload, options);
+
+      if (initial) await api.put(`/business/profili/${initial.id}`, payload);
+      else await api.post("/business/profili", payload);
       onSaved();
       onClose();
     } catch (e) {
@@ -298,9 +295,6 @@ function Editor({
 }
 export default function Tariffe() {
   const lista = useLista<Profilo>("/business/profili");
-  const [token, setToken] = useState("");
-  const [draftToken, setDraftToken] = useState("");
-  const [login, setLogin] = useState(false);
   const [edit, setEdit] = useState<Profilo | null | undefined>(undefined);
   const [revisioni, setRevisioni] = useState<Profilo[] | null>(null);
   const [error, setError] = useState("");
@@ -323,31 +317,12 @@ export default function Tariffe() {
         title="Offerte e tariffe business"
         description="Un profilo per ogni condizione commerciale. Prezzi, quote di potenza e imposte con fonte e decorrenza."
         action={
-          <button
-            className="button primary"
-            onClick={() => (token ? setEdit(null) : setLogin(true))}
-          >
+          <button className="button primary" onClick={() => setEdit(null)}>
             <Plus size={18} />
             Nuovo profilo
           </button>
         }
       />
-      <div className="business-access">
-        <div>
-          <LockKeyhole size={20} />
-          <span>
-            {token
-              ? "Chiave amministratore acquisita per questa sessione"
-              : "Consultazione libera · modifica riservata all’amministratore"}
-          </span>
-        </div>
-        <button
-          className="text-button"
-          onClick={() => (token ? setToken("") : setLogin(true))}
-        >
-          {token ? "Blocca modifiche" : "Sblocca tariffe"}
-        </button>
-      </div>
       {notice && (
         <p className="notice" role="status">
           {notice}
@@ -444,7 +419,7 @@ export default function Tariffe() {
                     <div className="business-profile-actions">
                       <button
                         className="button secondary compact"
-                        onClick={() => (token ? setEdit(p) : setLogin(true))}
+                        onClick={() => setEdit(p)}
                       >
                         <Pencil size={16} />
                         Modifica
@@ -463,39 +438,6 @@ export default function Tariffe() {
           )}
         </>
       )}
-      {login && (
-        <Dialogo title="Accesso amministratore" onClose={() => setLogin(false)}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              setToken(draftToken);
-              setDraftToken("");
-              setLogin(false);
-              setNotice(
-                "Chiave acquisita per questa sessione. Verrà verificata dal server al salvataggio.",
-              );
-            }}
-          >
-            <p className="form-intro">
-              Inserisci la chiave configurata sul backend. Resta in memoria e
-              viene rimossa ricaricando la pagina.
-            </p>
-            <Campo
-              label="Chiave amministratore"
-              type="password"
-              autoComplete="off"
-              required
-              value={draftToken}
-              onChange={(e) => setDraftToken(e.target.value)}
-            />
-            <Salva
-              busy={false}
-              label="Sblocca modifiche"
-              onCancel={() => setLogin(false)}
-            />
-          </form>
-        </Dialogo>
-      )}
       {edit !== undefined && (
         <Dialogo
           title={
@@ -506,7 +448,6 @@ export default function Tariffe() {
         >
           <Editor
             initial={edit}
-            token={token}
             onClose={() => setEdit(undefined)}
             onSaved={() => {
               lista.reload();

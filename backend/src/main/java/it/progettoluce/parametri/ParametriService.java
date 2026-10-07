@@ -39,7 +39,9 @@ public class ParametriService {
         r.oneriFissiMese(),
         r.oneriKwh(),
         r.accisaKwh(),
-        p.getVersione());
+        p.getVersione(),
+        r.oneriPotenzaMese(),
+        r.oneriSuPerdite());
   }
 
   @Transactional

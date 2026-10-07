@@ -38,6 +38,8 @@ public class MotoreCalcolo {
       ParametriRequest p = profili.get(m.getMese());
       if (p == null)
         throw new IllegalArgumentException("Profilo mensile mancante per " + m.getMese());
+      BigDecimal quote = BigDecimal.valueOf(m.getQuoteFisse());
+      BigDecimal potenza = b.getPotenzaKw().multiply(quote);
       BigDecimal netti = m.totaleKwh();
       BigDecimal perdite =
           perdita(m.getF1(), p).add(perdita(m.getF2(), p)).add(perdita(m.getF3(), p));
@@ -51,7 +53,7 @@ public class MotoreCalcolo {
               "Commercializzazione (PCV)",
               "ENERGIA",
               "€/mese",
-              BigDecimal.ONE,
+              quote,
               mensile);
         } else if (v.getTipo() == ENERGIA) {
           BigDecimal qta = quantita(v.getFascia(), m, p);
@@ -90,7 +92,7 @@ public class MotoreCalcolo {
           "Trasporto · quota fissa",
           "TRASPORTO",
           "€/mese",
-          BigDecimal.ONE,
+          quote,
           p.trasportoFissoMese());
       aggiungi(
           righe,
@@ -99,7 +101,7 @@ public class MotoreCalcolo {
           "Trasporto · potenza",
           "TRASPORTO",
           "€/kW/mese",
-          b.getPotenzaKw(),
+          potenza,
           p.trasportoPotenzaAnno().divide(DODICI, 12, RoundingMode.HALF_UP));
       aggiungi(
           righe,
@@ -117,10 +119,26 @@ public class MotoreCalcolo {
           "Oneri · quota fissa",
           "ONERI",
           "€/mese",
-          BigDecimal.ONE,
+          quote,
           p.oneriFissiMese());
       aggiungi(
-          righe, categorie, m.getMese(), "Oneri · energia", "ONERI", "€/kWh", netti, p.oneriKwh());
+          righe,
+          categorie,
+          m.getMese(),
+          "Oneri · potenza",
+          "ONERI",
+          "€/kW/mese",
+          potenza,
+          p.oneriPotenzaMese());
+      aggiungi(
+          righe,
+          categorie,
+          m.getMese(),
+          "Oneri · energia",
+          "ONERI",
+          "€/kWh",
+          p.oneriSuPerdite() ? netti.add(perdite) : netti,
+          p.oneriKwh());
       aggiungi(
           righe,
           categorie,

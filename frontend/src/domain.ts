@@ -25,6 +25,7 @@ export interface Offerta {
   }[];
 }
 export interface Mese {
+  quoteFisse?: number;
   mese: string;
   f1: string;
   f2: string;
@@ -32,6 +33,7 @@ export interface Mese {
   pun: Prezzi | null;
 }
 export interface DatiBolletta {
+  partitaIva?: string;
   cliente: string;
   pod: string;
   fornitore: string;
@@ -48,6 +50,8 @@ export interface Bolletta {
   dati: DatiBolletta;
 }
 export interface Parametri {
+  oneriPotenzaMese?: string;
+  oneriSuPerdite?: boolean;
   nomeProfilo: string;
   fonte: string;
   coefficientePerdite: string;
@@ -150,6 +154,7 @@ export const nuovaOfferta = (): Offerta => ({
   note: "",
 });
 export const meseVuoto = (): Mese => ({
+  quoteFisse: 1,
   mese: "",
   f1: "",
   f2: "",
@@ -160,14 +165,17 @@ export const nuovaBolletta = (): DatiBolletta => ({
   cliente: "",
   pod: "",
   fornitore: "",
-  potenzaKw: "3",
+  potenzaKw: "",
+  partitaIva: "",
   totaleFatturato: "",
-  aliquotaIva: "0.10",
+  aliquotaIva: "0.22",
   altrePartiteImponibili: "0",
   altrePartiteEsenti: "0",
   mesi: [meseVuoto()],
 });
 export const parametriVuoti = (): Parametri => ({
+  oneriPotenzaMese: "0",
+  oneriSuPerdite: false,
   nomeProfilo: "",
   fonte: "",
   coefficientePerdite: "",

@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-@org.springframework.context.annotation.Profile("domestico")
 @RestController
 @RequestMapping("/api/confronti")
 public class ConfrontoPdfController {

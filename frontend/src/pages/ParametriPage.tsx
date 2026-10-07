@@ -44,7 +44,8 @@ const gruppi: {
     title: "Oneri e imposte",
     items: [
       { key: "oneriFissiMese", label: "Oneri fissi (€/mese)" },
-      { key: "oneriKwh", label: "Oneri variabili (€/kWh netti)" },
+      { key: "oneriPotenzaMese", label: "Oneri · quota potenza (€/kW/mese)" },
+      { key: "oneriKwh", label: "Oneri variabili (€/kWh)" },
       {
         key: "accisaKwh",
         label: "Accisa (€/kWh netti)",
@@ -178,6 +179,16 @@ export default function ParametriPage() {
               {notice}
             </p>
           )}
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={form.oneriSuPerdite ?? false}
+              onChange={(e) =>
+                setForm({ ...form, oneriSuPerdite: e.target.checked })
+              }
+            />
+            Applica gli oneri variabili ai consumi incluse perdite
+          </label>
           <Salva busy={busy} label="Salva parametri" />
         </form>
       )}

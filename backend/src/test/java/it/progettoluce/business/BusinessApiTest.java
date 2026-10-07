@@ -36,7 +36,6 @@ class BusinessApiTest {
     return json.readTree(
         mvc.perform(
                 post("/api/business/profili")
-                    .header("X-Business-Admin", "test-business-key")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(payload(tariffa())))
             .andExpect(status().isCreated())
@@ -46,17 +45,13 @@ class BusinessApiTest {
   }
 
   @Test
-  void modificaTariffeProtettaEInputValidato() throws Exception {
+  void modificaTariffeSenzaChiaveEInputValidato() throws Exception {
     mvc.perform(
             post("/api/business/profili")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload(tariffa())))
-        .andExpect(status().isForbidden());
-    mvc.perform(
-            post("/api/business/profili")
-                .header("X-Business-Admin", "test-business-key")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{}"))
+        .andExpect(status().isCreated());
+    mvc.perform(post("/api/business/profili").contentType(MediaType.APPLICATION_JSON).content("{}"))
         .andExpect(status().isBadRequest());
     mvc.perform(get("/api/business/simulazioni?pagina=-1")).andExpect(status().isBadRequest());
     mvc.perform(get("/api/business/simulazioni?dimensione=101")).andExpect(status().isBadRequest());
@@ -95,13 +90,11 @@ class BusinessApiTest {
             versione);
     mvc.perform(
             put("/api/business/profili/" + id)
-                .header("X-Business-Admin", "test-business-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload(updated)))
         .andExpect(status().isOk());
     mvc.perform(
             put("/api/business/profili/" + id)
-                .header("X-Business-Admin", "test-business-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload(updated)))
         .andExpect(status().isConflict());
@@ -152,7 +145,6 @@ class BusinessApiTest {
             r.nome(), r.fonte(), r.dal(), r.al(), true, "", r.perdite(), true, r.voci(), null);
     mvc.perform(
             post("/api/business/profili")
-                .header("X-Business-Admin", "test-business-key")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(payload(invalid)))
         .andExpect(status().isBadRequest());

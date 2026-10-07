@@ -57,3 +57,25 @@ programma domestico. La CI usa 8089 per calcolo, PDF e persistenza.
 Il workflow del pacchetto Windows è rimosso da questo branch; la versione del
 collega rimane nel branch `windows-portabile`. I risultati Windows sopra citati
 si riferiscono alla prima implementazione, non alla distribuzione richiesta.
+
+
+## Riallineamento al programma domestico
+
+Ripristinate le sette sezioni e l'editor PDF completo. Rimossa la chiave di
+amministrazione da backend, frontend, Compose, ambienti e script.
+Aggiunte partita IVA, oneri di potenza mensili, base oneri con/senza perdite e
+controllo quote fisse/potenza per mese. Le migrazioni sono additive e conservano
+i dati. Il modulo dettagliato precedente è raggiungibile da link nelle sezioni
+principali; il programma domestico e il branch Windows non sono modificati.
+
+Un test API senza profilo domestico percorre parametri, offerta, bolletta, confronto,
+PDF e storico, controllando partita IVA, mesi senza quote, oneri di potenza e
+immutabilità dopo aggiornamento. Test browser del flusso principale e dell'editor
+PDF, oltre alle simulazioni dettagliate senza chiave.
+
+Verifica locale della revisione: 70 test backend (compreso il flusso business
+senza profilo domestico), 27 frontend, 2 percorsi browser desktop/mobile con
+editor PDF, logo, colori, esportazione e storico. Build frontend senza warning
+di bundle oltre 500 kB. Caso principale: 600 kWh, potenza 17,8 kW, PCV 120 €/anno,
+oneri potenza 2 €/kW/mese, energia 0,10 €/kWh e perdite zero: 128,83 € IVA inclusa.
+Con perdite 10% e gli stessi oneri di potenza: 136,15 €.

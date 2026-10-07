@@ -14,7 +14,6 @@ jobs:
       BUSINESS_PORT: '8089'
       BUSINESS_TEST_URL: http://127.0.0.1:8089
       FONTI_AUTOMATICO: 'false'
-      BUSINESS_ADMIN_TOKEN: synthetic-business-ci-key
     steps:
       - uses: actions/checkout@v4
       - name: Build immagini e avvio dello stack

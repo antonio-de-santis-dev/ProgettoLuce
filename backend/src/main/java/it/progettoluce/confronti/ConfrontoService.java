@@ -55,6 +55,9 @@ public class ConfrontoService {
   private final JsonCodec codec;
   private final ParametriUfficiali ufficiali;
 
+  @org.springframework.beans.factory.annotation.Autowired
+  private org.springframework.core.env.Environment environment;
+
   public ConfrontoService(
       BollettaService bollette,
       OffertaService offerte,
@@ -79,6 +82,10 @@ public class ConfrontoService {
     var p = parametri.leggi();
     Snapshot snapshot;
     if (r.usaFontiUfficiali()) {
+      if (!environment.acceptsProfiles(org.springframework.core.env.Profiles.of("domestico")))
+        throw new IllegalArgumentException(
+            "Per il business configura i parametri della fornitura: i profili ufficiali domestici"
+                + " non sono applicabili.");
       if (!r.confermaStandard())
         throw new IllegalArgumentException(
             "Conferma la compatibilità del dispacciamento standard con l'offerta e verifica"

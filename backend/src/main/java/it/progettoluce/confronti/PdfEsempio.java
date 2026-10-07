@@ -13,14 +13,14 @@ final class PdfEsempio {
   private PdfEsempio() {}
 
   static ConfrontoService.Risposta crea() {
-    String cliente = "Mario Rossi · Cliente dimostrativo",
+    String cliente = "Impresa Demo · Esempio business",
         note = "Esempio grafico: dati sintetici per l'anteprima.";
     int count = 10;
     var z = BigDecimal.ZERO;
     var mesi = List.of(new MeseRequest("2026-01", b("100"), b("200"), b("300"), null));
     var bolletta =
         new BollettaRequest(
-            cliente, "POD-DEMO", "Fornitore Demo", b("3"), b("200"), b("0.1"), z, z, mesi, 0L);
+            cliente, "POD-DEMO", "Fornitore Demo", b("17.8"), b("200"), b("0.22"), z, z, mesi, 0L);
     var offerta =
         new OffertaResponse(
             1L,
@@ -71,7 +71,7 @@ final class PdfEsempio {
                   ? "ENERGIA"
                   : i < 6 ? "TRASPORTO" : i < 8 ? "ONERI" : i == 8 ? "IMPOSTE" : "ALTRE_PARTITE",
               i == 4 ? "€/kW/mese" : i == 9 ? "€" : i == 1 || i == 3 || i == 6 ? "€/mese" : "€/kWh",
-              i == 4 ? b("3") : i == 1 || i == 3 || i == 6 || i == 9 ? b("1") : b("600"),
+              i == 4 ? b("17.8") : i == 1 || i == 3 || i == 6 || i == 9 ? b("1") : b("600"),
               i == 0 ? b("0.1") : i == 1 ? b("10") : z,
               i == 0 ? b("60") : i == 1 ? b("10") : z));
     }
@@ -86,12 +86,12 @@ final class PdfEsempio {
             righe,
             categorie,
             b("70"),
-            b("7"),
+            b("15.4"),
             z,
-            b("77"),
-            b("123"),
-            b("61.5"),
-            b("1476"),
+            b("85.4"),
+            b("114.6"),
+            b("57.3"),
+            b("1375.2"),
             1,
             "Proiezione indicativa: risparmio periodo × 12 / mesi. Non considera stagionalità o"
                 + " variazioni future del PUN.");

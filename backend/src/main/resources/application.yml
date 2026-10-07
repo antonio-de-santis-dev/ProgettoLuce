@@ -32,6 +32,3 @@ fonti:
   gme:
     login: ${GME_LOGIN:}
     password: ${GME_PASSWORD:}
-
-business:
-  admin-token: ${BUSINESS_ADMIN_TOKEN:}

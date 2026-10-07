@@ -4,7 +4,7 @@
 
 Branch `simulatore-business`, base `windows-portabile` commit `9060e1e`. Specifica: PDF “Analisi del file e specifica per una web app”, derivato da SIMULATOREBUSINESSLUCE.xlsx. Il workbook originale non è stato fornito; non sono ricostruite le sue tariffe né dichiarata equivalenza alle formule incoerenti.
 
-Moduli business autonomi; infrastruttura, componenti UI, decimali, font, Flyway, Docker e portable derivano da ProgettoLuce. Il main non viene modificato. La modalità domestica non è esposta senza attivare esplicitamente il profilo `domestico`; la sincronizzazione delle fonti domestiche è disabilitata nella modalità business.
+Moduli business autonomi; infrastruttura, componenti UI, decimali, font, Flyway, Docker e portable derivano da ProgettoLuce. Il main non viene modificato. Il flusso principale riprende le sette sezioni originali, adattate al business.
 
 ## Modello e persistenza
 
@@ -57,13 +57,13 @@ Il test del riferimento usa quote sintetiche per riprodurre i soli aggregati 988
 | GET | /api/business/simulazioni/{id} | Snapshot completo, no-store |
 | GET | /api/business/simulazioni/{id}/pdf | PDF dello snapshot, no-store |
 
-Paginazione: pagina >=0, dimensione 1–100. Input sconosciuti sono rifiutati da Jackson. Status: 400 validazione/dominio, 403 chiave errata, 404 assente, 409 versione obsoleta, 503 chiave backend non configurata.
+Paginazione: pagina >=0, dimensione 1–100. Input sconosciuti sono rifiutati da Jackson. Status: 400 validazione/dominio, 404 assente, 409 versione obsoleta.
 
 ## Sicurezza e avvio
 
-Modifica profili: chiave server da BUSINESS_ADMIN_TOKEN, confronto a tempo costante, inviata nell'header dal frontend; mai inserita nel bundle o nello storage browser. La UI acquisisce la chiave, ma la verifica autorevole avviene sul server al salvataggio. Bozza/verificato è una classificazione interna, non una firma o certificazione.
+Modifica profili senza chiave amministratore. Bozza/verificato è una classificazione interna, non una certificazione.
 
-Demo e portable bind su loopback, DB business distinto. Docker frontend su loopback, DB/backend non pubblicati, chiave amministratore richiesta. CSP, nosniff e protezione dall'incorporamento conservate. Il progetto rimane un workspace locale condiviso: non ci sono utenti, segregazione per consulente o protezione delle letture delle simulazioni per utente. Per uso Internet occorre un progetto di autenticazione completo.
+Demo e portable bind su loopback, DB business distinto. Docker frontend su loopback, DB/backend non pubblicati, nessuna chiave amministratore. CSP, nosniff e protezione dall'incorporamento conservate. Il progetto rimane un workspace locale condiviso: non ci sono utenti, segregazione per consulente o protezione delle letture delle simulazioni per utente. Per uso Internet occorre un progetto di autenticazione completo.
 
 ## Collaudo
 
@@ -78,4 +78,35 @@ Le vecchie suite domestiche sono conservate; i vecchi E2E sono spostati in front
 URL: `http://localhost:8089`. Variabile dedicata `BUSINESS_PORT`, predefinita 8089;
 `FRONTEND_PORT` della versione domestica non ha effetto su questo branch.
 Nome del progetto Compose: `luce-business`; volume PostgreSQL separato.
-Chiave per modifica tariffe: `BUSINESS_ADMIN_TOKEN` del `.env`.
+Nessuna chiave per modificare tariffe e parametri.
+
+## Revisione: stesso programma e stesse sezioni del domestico
+
+Questa revisione sostituisce le descrizioni precedenti relative alla chiave e alla
+UI di tre sezioni. Il workspace è Progetto Luce Business, con Confronto, Bollette
+clienti, Offerte, Parametri gestore, Fonti ufficiali, Impostazioni PDF e Storico.
+I controller originali sono disponibili nell'avvio standard, senza profilo speciale.
+La chiave BUSINESS_ADMIN_TOKEN, BusinessAdmin e il controllo nell'editor sono rimossi.
+Le API di modifica profili non richiedono header amministratore.
+
+Il flusso principale usa /api/bollette, /api/offerte, /api/parametri,
+/api/confronti, /api/fonti e /api/impostazioni-pdf. Il modulo /api/business resta
+accessibile per le simulazioni dettagliate già salvate. Le due tipologie di storico
+sono collegate nella sezione Storico; nessuna simulazione è eliminata.
+
+Migrazione V5 additiva: partita_iva in bollette, quote_fisse nei mesi, default 1
+per i record precedenti. Parametri JSON aggiuntivi: oneriPotenzaMese (default zero)
+e oneriSuPerdite (default false). DTO e snapshot precedenti restano leggibili.
+
+Le quote mensili sono 0/1: se zero, PCV, trasporto fisso/potenza e oneri fissi/potenza
+non vengono addebitati; le voci kWh rimangono attive. Gli oneri di potenza sono
+potenza × €/kW/mese; gli oneri variabili usano netti o netti+perdite configurabili.
+Il confronto principale applica l'aliquota IVA della bolletta (22% iniziale nella UI).
+Il modello dettagliato conserva la fiscalità distinta per voce.
+
+La sezione Fonti ufficiali consulta indici e riferimenti. Il backend rifiuta
+usaFontiUfficiali domestiche nella modalità business: niente trasporto, oneri o
+CdispD domestici usati sulle imprese. Il profilo domestico resta solo per i test
+storici di quelle formule. Il PUN della bolletta è sempre esplicito nel confronto.
+
+Docker: 8089, progetto luce-business, sola password DB richiesta in .env.

@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-@org.springframework.context.annotation.Profile("domestico")
 @RestController
 @RequestMapping("/api/fonti")
 @Validated

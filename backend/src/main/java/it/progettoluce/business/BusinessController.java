@@ -14,12 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/business")
 public class BusinessController {
   private final BusinessService service;
-  private final BusinessAdmin admin;
   private final BusinessPdf pdf;
 
-  public BusinessController(BusinessService s, BusinessAdmin a, BusinessPdf p) {
+  public BusinessController(BusinessService s, BusinessPdf p) {
     service = s;
-    admin = a;
     pdf = p;
   }
 
@@ -29,20 +27,13 @@ public class BusinessController {
   }
 
   @PostMapping("/profili")
-  public ResponseEntity<Profilo> creaProfilo(
-      @RequestHeader(value = "X-Business-Admin", defaultValue = "") String token,
-      @Valid @RequestBody ProfiloInput r) {
-    admin.verifica(token);
+  public ResponseEntity<Profilo> creaProfilo(@Valid @RequestBody ProfiloInput r) {
     var p = service.salva(null, r);
     return ResponseEntity.created(URI.create("/api/business/profili/" + p.id())).body(p);
   }
 
   @PutMapping("/profili/{id}")
-  public Profilo salvaProfilo(
-      @PathVariable @Positive Long id,
-      @RequestHeader(value = "X-Business-Admin", defaultValue = "") String token,
-      @Valid @RequestBody ProfiloInput r) {
-    admin.verifica(token);
+  public Profilo salvaProfilo(@PathVariable @Positive Long id, @Valid @RequestBody ProfiloInput r) {
     return service.salva(id, r);
   }
 

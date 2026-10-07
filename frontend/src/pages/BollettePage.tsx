@@ -68,7 +68,7 @@ function BollettaForm({
       </p>
       <div className="form-grid">
         <Campo
-          label="Cliente"
+          label="Ragione sociale"
           required
           maxLength={150}
           value={form.cliente}
@@ -130,6 +130,14 @@ function BollettaForm({
           onChange={(e) => set("altrePartiteEsenti", e.target.value)}
         />
       </div>
+      <Campo
+        label="Partita IVA"
+        pattern="[0-9]{11}|"
+        maxLength={11}
+        value={form.partitaIva ?? ""}
+        onChange={(e) => set("partitaIva", e.target.value)}
+        hint="Facoltativa · 11 cifre"
+      />
       <h3 className="section-heading">Consumi mensili</h3>
       {form.mesi.map((m, index) => (
         <fieldset className="month-card" key={index}>
@@ -153,6 +161,16 @@ function BollettaForm({
               />
             ))}
           </div>
+          <label className="check">
+            <input
+              type="checkbox"
+              checked={(m.quoteFisse ?? 1) === 1}
+              onChange={(e) =>
+                mese(index, "quoteFisse", e.target.checked ? 1 : 0)
+              }
+            />
+            Applica quote fisse e di potenza al mese {index + 1}
+          </label>
           <label className="check">
             <input
               type="checkbox"

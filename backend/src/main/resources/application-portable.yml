@@ -11,6 +11,3 @@ spring.lifecycle.timeout-per-shutdown-phase: 20s
 luce.portable:
   token: ${LUCE_PORTABLE_TOKEN}
   instance: ${LUCE_PORTABLE_INSTANCE}
-
-business:
-  admin-token: ${BUSINESS_ADMIN_TOKEN:demo-business-local}

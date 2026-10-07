@@ -27,8 +27,8 @@ public class ConfrontoPdfRenderer {
     try (PDDocument document = new PDDocument();
         ByteArrayOutputStream output = new ByteArrayOutputStream()) {
       var info = document.getDocumentInformation();
-      info.setTitle("ProgettoLuce - Confronto #" + confronto.id());
-      info.setAuthor("ProgettoLuce");
+      info.setTitle("Progetto Luce Business - Confronto #" + confronto.id());
+      info.setAuthor("Progetto Luce Business");
       info.setSubject("Simulazione parametrica dei costi dell'energia elettrica");
       try (Layout l = new Layout(document, confronto.id(), opzioni, logo)) {
         var s = confronto.dati();
@@ -46,7 +46,9 @@ public class ConfrontoPdfRenderer {
               false);
         }
         l.section("Cliente e proposta");
-        l.field("Cliente", b.cliente());
+        l.field("Ragione sociale", b.cliente());
+        if (b.partitaIva() != null && !b.partitaIva().isBlank())
+          l.field("Partita IVA", b.partitaIva());
         l.field("POD / fornitore attuale", b.pod() + " / " + b.fornitore());
         l.field("Offerta proposta", o.nomeOfferta() + " / " + o.nomeFornitore());
         l.field(
@@ -168,7 +170,10 @@ public class ConfrontoPdfRenderer {
         l.row("Trasporto potenza", number(p.trasportoPotenzaAnno()) + " €/kW/anno");
         l.row("Trasporto variabile (netto)", number(p.trasportoKwh()) + " €/kWh");
         l.row("Oneri fissi", number(p.oneriFissiMese()) + " €/mese");
-        l.row("Oneri variabili (netti)", number(p.oneriKwh()) + " €/kWh");
+        l.row("Oneri potenza", number(p.oneriPotenzaMese()) + " €/kW/mese");
+        l.row(
+            p.oneriSuPerdite() ? "Oneri variabili (con perdite)" : "Oneri variabili (netti)",
+            number(p.oneriKwh()) + " €/kWh");
         l.row("Accisa uniforme (netta)", number(p.accisaKwh()) + " €/kWh");
         if (confronto.dati().parametriMensili() != null) {
           l.section("Fonti e parametri mensili salvati");
@@ -352,7 +357,7 @@ public class ConfrontoPdfRenderer {
           bold,
           logo == null ? 20 : 16,
           ink);
-      text("PROGETTO LUCE · REPORT #" + id, titleX, 777, regular, 9, ink);
+      text("PROGETTO LUCE BUSINESS · REPORT #" + id, titleX, 777, regular, 9, ink);
       y = 721;
     }
 
@@ -551,7 +556,8 @@ public class ConfrontoPdfRenderer {
           footer.setFont(regular, 8);
           footer.setNonStrokingColor(MUTED);
           footer.newLineAtOffset(LEFT, 35);
-          footer.showText("ProgettoLuce · Confronto #" + id + " · Simulazione parametrica");
+          footer.showText(
+              "Progetto Luce Business · Confronto #" + id + " · Simulazione parametrica");
           footer.endText();
           footer.beginText();
           footer.setFont(regular, 8);

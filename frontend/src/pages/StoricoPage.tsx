@@ -10,6 +10,11 @@ export default function StoricoPage() {
   const [selected, setSelected] = useState<Confronto | null>(null);
   return (
     <>
+      <p className="help">
+        <Link to="/storico-simulazioni">
+          Consulta lo storico delle simulazioni dettagliate
+        </Link>
+      </p>
       <Titolo
         eyebrow="Le tue consulenze"
         title="Storico confronti"

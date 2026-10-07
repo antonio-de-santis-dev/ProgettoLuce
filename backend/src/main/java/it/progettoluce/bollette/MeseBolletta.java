@@ -20,6 +20,9 @@ public class MeseBolletta {
   @Column(nullable = false, length = 7)
   private String mese;
 
+  @Column(nullable = false)
+  private int quoteFisse = 1;
+
   @Column(nullable = false, precision = 14, scale = 6)
   private BigDecimal f1;
 
@@ -48,6 +51,7 @@ public class MeseBolletta {
 
   void aggiorna(MeseRequest r) {
     mese = r.mese();
+    quoteFisse = r.quoteFisse();
     f1 = r.f1();
     f2 = r.f2();
     f3 = r.f3();
@@ -74,11 +78,15 @@ public class MeseBolletta {
     return pun;
   }
 
+  public int getQuoteFisse() {
+    return quoteFisse;
+  }
+
   public BigDecimal totaleKwh() {
     return f1.add(f2).add(f3);
   }
 
   public MeseRequest dati() {
-    return new MeseRequest(mese, f1, f2, f3, pun);
+    return new MeseRequest(mese, f1, f2, f3, pun, quoteFisse);
   }
 }
